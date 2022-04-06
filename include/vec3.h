@@ -51,4 +51,4 @@ void vec3_add_store(float* a, float* b, float* result);
 void vec3_sub_store(float* a, float* b, float* result);
 
 void vec3_scale(float* vector, float scalar);
-void vec3_scale_to(float* vector, float scalar, float* result);
+void vec3_scale_store(float* vector, float scalar, float* result);
