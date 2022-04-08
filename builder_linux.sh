@@ -2,7 +2,6 @@ echo "------- Setup -------"
 
 mkdir lib
 NOFPROC=`expr $(nproc) - 1`
-
 cd submodules
 
 echo "------- Building GLFW LIBRARY -------"
