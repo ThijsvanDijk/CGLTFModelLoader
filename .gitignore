@@ -53,4 +53,4 @@ dkms.conf
 
 # Build Folder
 build/
-include/GLFW
+submodules/*/build/

@@ -1,15 +1,43 @@
+#include <stdlib.h>
 #include <stdio.h>
-#include <vec3.h>
+
+#include <glad/gl.h>
+
 #include <GLFW/glfw3.h>
 
-int main(){
-    glfwInit();    
-    vec3 a = {6.22, 7.21, 0.84};
-    vec3 b = {4.76, 9.19, 5.38};
-    vec3 result;
 
-    vec3_add_store(a, b, result);
+const GLuint WIDTH = 800, HEIGHT = 600;
 
-    printf("Result = {%.2f, %.2f, %.2f}\n", result[0], result[1], result[2]);
+void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode) {
+    if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
+        glfwSetWindowShouldClose(window, GL_TRUE);
+}
+
+int main(void) {
+    glfwInit();
+
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
+    GLFWwindow* window = glfwCreateWindow(WIDTH, HEIGHT, "[glad] GL with GLFW", NULL, NULL);
+    glfwMakeContextCurrent(window);
+
+    glfwSetKeyCallback(window, key_callback);
+
+    int version = gladLoadGL(glfwGetProcAddress);
+    printf("GL %d.%d\n", GLAD_VERSION_MAJOR(version), GLAD_VERSION_MINOR(version));
+
+    while (!glfwWindowShouldClose(window)) {
+        glfwPollEvents();
+
+        glClearColor(0.7f, 0.9f, 0.1f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT);
+
+        glfwSwapBuffers(window);
+    }
+
+    glfwTerminate();
+
     return 0;
 }
