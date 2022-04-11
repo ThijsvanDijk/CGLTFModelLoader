@@ -9,10 +9,10 @@ set(CMAKE_C_FLAGS -O2)
 include_directories(include)
 link_directories(lib)
 
-add_executable(CGLTFModelLoader src/main.c src/modules/vec3.c src/deps/gl.c)
+add_executable(CGLTFModelLoader src/main.c src/modules/camera.c src/deps/gl.c)
 
 IF(WIN32)
-target_link_libraries(CGLTFModelLoader PRIVATE glfw3 cglm)
+target_link_libraries(CGLTFModelLoader PRIVATE glfw3 cglm m)
 ELSE()
-target_link_libraries(CGLTFModelLoader PRIVATE glfw cglm)
+target_link_libraries(CGLTFModelLoader PRIVATE glfw cglm m)
 ENDIF()
