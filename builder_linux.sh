@@ -4,6 +4,16 @@ mkdir lib
 NOFPROC=`expr $(nproc) - 1`
 cd submodules
 
+echo "------- Building ASSIMP LIBRARY -------"
+
+mkdir assimp/build
+cmake -B assimp/build/ -S assimp/ -DBUILD_ASSIMP_TOOLS=OFF -DASSIMP_BUILD_TESTS=OFF -DINJECT_DEBUG_POSTFIX=OFF -DASSIMP_INSTALL_PDB=OFF -DIGNORE_GIT_HASH=ON
+cmake --build assimp/build/ --config Release -j$NOFPROC
+cp assimp/build/bin/libassimp.so* ../lib/
+cp assimp/build/include/assimp/config.h ../include/assimp/
+
+echo "------- Done Building ASSIMP LIBRARY -------"
+
 echo "------- Building GLFW LIBRARY -------"
 
 mkdir glfw/build
@@ -23,6 +33,7 @@ cp cglm/build/libcglm.so* ../lib/
 echo "------- Done Building GLFW LIBRARY -------"
 
 cd ../
+rm -R submodules/*/build
 
 echo "------- Building Executable -------"
 

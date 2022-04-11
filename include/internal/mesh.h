@@ -24,6 +24,7 @@ typedef struct Vertex{
 typedef struct Texture{
     unsigned int id;
     enum TEXTURE_TYPE type;
+    char variable_name[21];
 } Texture;
 
 typedef struct Mesh{

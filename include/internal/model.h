@@ -1,11 +1,9 @@
 #ifndef MODEL_H
 #define MODEL_H
 
-#include <glad/glad.h>
+#include <glad/gl.h>
 
 #include <cglm/cglm.h>
-#include <stb/stb_image.h>
-#include <cgltf/cgltf.h>
 #include <assimp/cimport.h>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
