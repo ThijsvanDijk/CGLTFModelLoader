@@ -56,3 +56,5 @@ build/
 lib/
 submodules/*/build
 .vscode/
+resources/models
+include/assimp/config.h
