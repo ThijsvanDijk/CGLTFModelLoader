@@ -13,6 +13,15 @@ cp glfw/build/src/libglfw.so* ../lib/
 
 echo "------- Done Building GLFW LIBRARY -------"
 
+echo "------- Building CGLM LIBRARY -------"
+
+mkdir cglm/build
+cmake -B cglm/build/ -S cglm/ -DCGLM_SHARED=ON -DCGLM_USE_TEST=OFF
+cmake --build cglm/build/ --config Release -j$NOFPROC
+cp cglm/build/libcglm.so* ../lib/
+
+echo "------- Done Building GLFW LIBRARY -------"
+
 cd ../
 
 echo "------- Building Executable -------"
