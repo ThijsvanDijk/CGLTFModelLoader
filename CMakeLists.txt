@@ -1,12 +1,10 @@
-include(ProcessorCount)
-ProcessorCount(N)
-
 cmake_minimum_required(VERSION 3.10)
 
 project(CGLTFModelLoader VERSION 0.1)
 
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED True)
+set(CMAKE_C_FLAGS -O2)
 
 include_directories(include)
 link_directories(lib)

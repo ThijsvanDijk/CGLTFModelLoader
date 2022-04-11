@@ -2,9 +2,7 @@
 #include <stdio.h>
 
 #include <glad/gl.h>
-
 #include <GLFW/glfw3.h>
-#include <cglm/cglm.h>
 
 
 const GLuint WIDTH = 800, HEIGHT = 600;
@@ -26,12 +24,10 @@ int main(void) {
 
     glfwSetKeyCallback(window, key_callback);
 
-    int version = gladLoadGL(glfwGetProcAddress);
-    printf("GL %d.%d\n", GLAD_VERSION_MAJOR(version), GLAD_VERSION_MINOR(version));
-    vec3 vector = {0.2f, 7.4f, 8.2f};
-    float scale = 9.2f;
-    glm_vec3_scale(vector, scale, vector);
-    printf("Vector Result:\t%.2f\t%.2f\t%.2f\n", vector[0], vector[1], vector[2]);
+    gladLoadGL(glfwGetProcAddress);
+
+    glViewport(0, 0, WIDTH, HEIGHT);
+
     while (!glfwWindowShouldClose(window)) {
         glfwPollEvents();
 
