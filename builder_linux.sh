@@ -1,8 +1,5 @@
 #!/bin/bash
 
-if [$1 == "-a"]
-then
-
 echo "------- Setup -------"
 
 sh clean_linux.sh
@@ -39,8 +36,6 @@ cp cglm/build/libcglm.so* ../lib/
 echo "------- Done Building GLFW LIBRARY -------"
 
 cd ../
-rm -R submodules/*/build
-fi
 
 echo "------- Building Executable -------"
 
