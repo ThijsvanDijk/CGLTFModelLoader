@@ -7,6 +7,7 @@
 #include <cglm/cglm.h>
 #include <internal/camera.h>
 #include <internal/shader.h>
+#include <internal/model.h>
 
 #include <assimp/cimport.h>
 
@@ -39,6 +40,10 @@ int main(void) {
     mat4 view;
     engine_camera_view_matrix(&cam, view);
     GLuint program = engine_shader_make_program_from_files("resources/shaders/vertex.glsl", "resources/shaders/fragment.glsl");
+
+    Model model;
+    engine_model_make("resources/models/crow/scene.gltf", &model);
+    // engine_model_free(&model);
 
     // -------------------------------------------------------
     float vertices[] = {

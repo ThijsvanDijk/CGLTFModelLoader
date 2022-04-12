@@ -1,5 +1,11 @@
+#!/bin/bash
+
+if [$1 == "-a"]
+then
+
 echo "------- Setup -------"
 
+sh clean_linux.sh
 mkdir lib
 NOFPROC=`expr $(nproc) - 1`
 cd submodules
@@ -34,6 +40,7 @@ echo "------- Done Building GLFW LIBRARY -------"
 
 cd ../
 rm -R submodules/*/build
+fi
 
 echo "------- Building Executable -------"
 
