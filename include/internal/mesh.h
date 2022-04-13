@@ -33,19 +33,19 @@ typedef struct Vertex{
 
 //==============================================================================//
 
-typedef struct texture{
+typedef struct Texture{
     unsigned int id;
     enum TEXTURE_TYPE type;
-    char uniform_variable_name[20];
+    char uniform_variable_name[23]; // Choose 23 + \0, so struct size is 32 (easy for memory operations)
 } Texture;
 
 //==============================================================================//
 
 typedef struct Mesh{
+    unsigned int VAO, VBO, EBO, vertex_count, index_count, texture_count;
     Vertex * vertices;
     unsigned int  * indices;
     Texture* textures;
-    unsigned int VAO, VBO, EBO, vertex_count, index_count, texture_count;
 } Mesh;
 
 //==============================================================================//

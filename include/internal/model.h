@@ -31,10 +31,7 @@ unsigned long engine_model_allocate_bytes(const struct aiScene* scene);
 
 //==============================================================================//
 
-unsigned char engine_model_make(
-    const char* path, 
-    Model* store
-);
+Model* engine_model_make(const char* path);
 
 //==============================================================================//
 

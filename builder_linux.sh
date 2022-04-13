@@ -2,7 +2,6 @@
 
 echo "------- Setup -------"
 
-sh clean_linux.sh
 mkdir lib
 NOFPROC=`expr $(nproc) - 1`
 cd submodules
