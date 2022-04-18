@@ -42,10 +42,7 @@ typedef struct Texture{
 //==============================================================================//
 
 typedef struct Mesh{
-    unsigned int VAO, VBO, EBO, vertex_count, index_count, texture_count;
-    Vertex * vertices;
-    unsigned int  * indices;
-    Texture* textures;
+    unsigned int VAO, VBO, EBO, vertex_count, index_count;
 } Mesh;
 
 //==============================================================================//

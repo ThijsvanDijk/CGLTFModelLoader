@@ -42,10 +42,6 @@ int main(void) {
     GLuint program = engine_shader_make_program_from_files("resources/shaders/vertex.glsl", "resources/shaders/fragment.glsl");
 
     Model* model = engine_model_make("resources/models/crow/scene.gltf");
-    printf("%lu\n", sizeof(Texture));
-    free(model);
-
-    // engine_model_free(&model);
 
     // -------------------------------------------------------
     // float vertices[] = {
@@ -70,19 +66,20 @@ int main(void) {
 
     // -------------------------------------------------------
 
-    // while (!glfwWindowShouldClose(window)) {
-    //     glfwPollEvents();
+    while (!glfwWindowShouldClose(window)) {
+        glfwPollEvents();
 
-    //     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-    //     glClear(GL_COLOR_BUFFER_BIT);
+        glClearColor(0.2f, 0.1f, 0.5f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT);
 
-    //     glUseProgram(program);
-    //     glBindVertexArray(VAO);
-    //     glDrawArrays(GL_TRIANGLES, 0, 3);
+        // glUseProgram(program);
+        // glBindVertexArray(VAO);
+        // glDrawArrays(GL_TRIANGLES, 0, 3);
+        engine_model_draw(model, program);
 
-    //     glfwSwapBuffers(window);
-    // }
-
+        glfwSwapBuffers(window);
+    }
+    free(model);
     glfwTerminate();
 
     return 0;

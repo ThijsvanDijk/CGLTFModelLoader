@@ -20,18 +20,15 @@
 
 //==============================================================================//
 
+/**
+ * @brief Models are built out of Meshes. All Mesh data is located directly after
+ * Model members, so that all the data is in contiguous memory. Model houses the
+ * amount of meshes, an array containing each Mesh's size in bytes, and the pointers
+ * to each individual Mesh's data. Both meshes and meshes_size have a length of meshes_count. 
+ */
 typedef struct Model{
     unsigned int meshes_count;
-    Mesh meshes[];
 } Model;
-
-//==============================================================================//
-
-unsigned long engine_model_allocate_bytes(const struct aiScene* scene);
-
-//==============================================================================//
-
-Model* engine_model_make(const char* path);
 
 //==============================================================================//
 
@@ -42,54 +39,34 @@ void engine_model_draw(
 
 //==============================================================================//
 
-unsigned char engine_model_load(
-    const struct aiScene* scene, 
-    Model* store
-);
-
-//==============================================================================//
-
-void engine_model_process_node(
-    const struct aiNode* node, 
-    const struct aiScene* scene, 
-    Model* store
-);
-
-//==============================================================================//
-
-void engine_model_process_mesh(
-    const struct aiMesh* mesh, 
-    const struct aiScene* scene, 
-    Mesh* store_mesh, 
-    const char* dir
-);
-
-//==============================================================================//
-
-void engine_model_load_material(
-    const struct aiMaterial* mat, 
-    enum aiTextureType type, 
-    TEXTURE_TYPE custom_type, 
-    Mesh* store_mesh, 
-    const char* dir, 
-    unsigned int* loaded_tex
-);
-
-//==============================================================================//
-
-unsigned int engine_texture_from_file(
-    const char* path, 
-    const char* directory
-);
-
-//==============================================================================//
-
 /**
- * @brief Deallocates all heap allocated memory from a model
+ * @brief Calculates the amount of bytes necessary to store all model and mesh
+ * data of a given scene.
  * 
- * @param[in] model Model that needs to be deallocated 
+ * @param scene The Assimp scene to be stored in memory
+ * @return Amount of bytes necessary to store model in memory 
  */
-void engine_model_free(Model* model);
+unsigned long engine_model_allocate_bytes(const struct aiScene* scene);
+
+//==============================================================================//
+
+void engine_model_recursive_scene_size(const struct aiNode* node, const struct aiScene* scene, unsigned long *va, unsigned long *ia, unsigned long* ma);
+
+//==============================================================================//
+
+Model* engine_model_make(const char* path);
+
+//==============================================================================//
+
+void engine_model_fill_data_from_scene(const struct aiScene* scene, Model* model);
+
+//==============================================================================//
+
+void engine_model_fill_from_node(const struct aiScene* scene, const struct aiNode* node, void *write, Model* model, unsigned int *amount_of_meshes_written);
+
+//==============================================================================//
+
+void engine_model_fill_mesh(const struct aiMesh* mesh, void* write_position);
 
 //==============================================================================//
 
