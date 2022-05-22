@@ -76,6 +76,12 @@ void engine_camera_update_vectors(camera* camera);
 void engine_camera_view_matrix(camera* camera, mat4 dest);
 
 //==============================================================================//
+#define CAMERA_DEFAULT_YAW -90.0f;
+#define CAMERA_DEFAULT_PITCH 0.0f;
+#define CAMERA_DEFAULT_SPEED 7.5f;
+#define CAMERA_DEFAULT_SENSITIVITY 0.1f; 
+#define CAMERA_DEFAULT_ZOOM 45.0f;
+
 
 void engine_camera_process_keyboard(camera* camera, MOVEMENT_DIRECTION direction, float deltaTime);
 void engine_camera_process_mouse_movement(camera* camera, float xoffset, float yoffset, unsigned char constrainPitch);

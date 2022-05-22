@@ -1,11 +1,5 @@
 #include <3D/camera/camera.h>
 
-const float CAMERA_DEFAULT_YAW          = -90.0f;
-const float CAMERA_DEFAULT_PITCH        =   0.0f;
-const float CAMERA_DEFAULT_SPEED        =   2.5f;
-const float CAMERA_DEFAULT_SENSITIVITY  =   0.1f; 
-const float CAMERA_DEFAULT_ZOOM         =  45.0f;
-
 void engine_camera_default_values(camera* camera){
     memset(camera, 0, offsetof(struct camera, yaw));        // Make all vector values 0
     camera->position[2] = 3.0f;
