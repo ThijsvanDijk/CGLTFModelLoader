@@ -15,11 +15,5 @@ Every dependency (except GLAD) is included as a submodule and is built with the 
 - GLFW for managing windows and user input
 
 ## Building
-**Before building make sure to initialise the submodules with ```bash git submodule update --init```
-```bash
-mkdir build && cd build
-cmake ../
-cmake --build .
-```
-This will generate a .a file for use with gcc compiler
+**Before building make sure to initialise the submodules with:** ```bash git submodule update --init```
 
