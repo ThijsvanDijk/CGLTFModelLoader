@@ -8,13 +8,14 @@ Currently only supported on Linux, I'm working on easy cross-platform building f
 - Reads both position and normal data for now, working on including texture coordinates now
 
 ## Dependencies
+Every dependency (except GLAD) is included as a submodule and is built with the build.sh script
 - CGLM for fast math
 - ZZZJSON fastest JSON parser I could find
 - GLAD for loading OpenGL functions
 - GLFW for managing windows and user input
 
-## Build
-The library can be build with cmake like any other:
+## Building
+**Before building make sure to initialise the submodules with ```bash git submodule update --init```
 ```bash
 mkdir build && cd build
 cmake ../
