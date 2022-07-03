@@ -1,7 +1,9 @@
 #include <zzzjson/zzzjson.h>
 #include <cglm/cglm.h>
 #include <glad/glad.h>
-#include <unistd.h>
+#ifndef _WIN32
+    #include <unistd.h>
+#endif
 #include <fcntl.h>
 
 #define GLB_IDENTIFICATION_CODE 0x46546C67
@@ -72,6 +74,7 @@ typedef struct {
     unsigned int glb_size;
 } BufferInfo;
 
+#ifndef _WIN32
 /**
  * @brief Convert a GLTF file into a optimised GLB format where data is stored exactly as OpenGL works with it,
  * allowing possible future extension with DirectStorage like technologies, drastically reducing load times.
@@ -82,6 +85,7 @@ typedef struct {
  * @return char Returns 0 if succesful, if 0 is not returned: error
  */
 char convertGLTFToGLB(BufferInfo * info, Mesh * mesh, const char * filename);
+#endif
 
 /**
  * @brief Gets info about a model before loading occurs

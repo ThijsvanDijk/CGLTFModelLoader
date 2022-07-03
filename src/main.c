@@ -77,7 +77,7 @@ int main(void) {
     glfwSetCursorPosCallback(window, mouse_callback);
     glfwSetScrollCallback(window, scroll_callback);
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-
+    printf("Cool -1");
     //----------OpenGL Setup----------
     gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
 
@@ -88,8 +88,9 @@ int main(void) {
     mat4 view;
     engine_camera_view_matrix(&cam, view);
     main_cam = &cam;
+    printf("Cool");
     GLuint program = engine_shader_make_program_from_files("resources/shaders/vertex.glsl", "resources/shaders/fragment.glsl");
-
+    printf("Cool 1");
     //----------Get GLTF Model----------
     BufferInfo buffer_data;   
     char code = getGLTFModelInfo("resources/models/crow/scene.gltf", &buffer_data);
@@ -97,6 +98,7 @@ int main(void) {
         fprintf(stderr, "Model failed to load, quitting...\n");
         return -1;
     }
+    printf("Cool2");
 
     Vertex vertices[buffer_data.vertex_count];
     unsigned int indices[buffer_data.index_count];
@@ -111,6 +113,7 @@ int main(void) {
         fprintf(stderr, "Binary data loading failed, quitting...\n");
         return -1;
     }
+    printf("Cool 4");
 
     //----------Vertex Array Setup----------
     GLuint VBO, VAO, EBO;
@@ -118,6 +121,8 @@ int main(void) {
     glGenBuffers(1, &VBO);
     glGenBuffers(1, &EBO);
     glBindVertexArray(VAO);
+
+    printf("Cool 5");
 
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
@@ -129,6 +134,8 @@ int main(void) {
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(1, 3, buffer_data.vertex_normal_type, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, normal));
     glEnableVertexAttribArray(1);
+
+    printf("Cool 6");
 
     vec3 scale = {1.0f, 1.0f, 1.0f};
 

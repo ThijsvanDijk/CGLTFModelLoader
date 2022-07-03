@@ -22,4 +22,9 @@ link_directories(${PROJECT_SOURCE_DIR}/build/deps/glfw/src)
 
 add_executable(CGLTFModelLoader src/main.c src/modules/3D/camera/camera.c src/modules/3D/shader/shader.c src/modules/3D/model/gltfLoader.c src/modules/glad/glad.c)
 
-target_link_libraries(CGLTFModelLoader PRIVATE glfw m X11)
+
+if(WIN32)
+    target_link_libraries(CGLTFModelLoader PRIVATE glfw m)
+else()
+    target_link_libraries(CGLTFModelLoader PRIVATE glfw m X11)
+endif()    

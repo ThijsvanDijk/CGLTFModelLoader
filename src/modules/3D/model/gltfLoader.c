@@ -1,7 +1,5 @@
 #include <3D/model/gltfLoader.h>
 
-#define NO_FREAD
-
 static const ComponentType components[] = {
     {GL_BYTE, 5120, 8},
     {GL_UNSIGNED_BYTE, 5121, 8},
@@ -17,7 +15,7 @@ unsigned int getGLComponentTypeFromGLTFType(unsigned int type){
     }
     return 0;
 }
-
+#ifndef _WIN32
 char convertGLTFToGLB(BufferInfo * info, Mesh * mesh, const char * filename){
     if(loadGLTFBinaryData(info, mesh) == -1) return -1;
     int file_d = open(filename, O_CREAT | O_WRONLY | O_NONBLOCK | O_TRUNC);
@@ -52,6 +50,7 @@ char convertGLTFToGLB(BufferInfo * info, Mesh * mesh, const char * filename){
     ReleaseAllocator(info->allocator);
     return 0;
 }
+#endif
 
 char getGLTFModelInfo(const char * filename, BufferInfo * data){
     //---------- READING GLTF FILE ----------//
@@ -61,15 +60,15 @@ char getGLTFModelInfo(const char * filename, BufferInfo * data){
         return -1;
     }
     fseek(file, 0L, SEEK_END);
-    unsigned long file_size = ftell(file);
+    const unsigned long file_size = ftell(file);
     rewind(file);
 
     char gltf_json[file_size + 1];
     gltf_json[file_size] = 0;
     fread(gltf_json, file_size, 1, file);
 
-    fclose(file);
 
+    fclose(file);
     //---------- PARSING JSON ----------//
     data->allocator = NewAllocator();
     Value *parsed_json = NewValue(data->allocator);
@@ -115,37 +114,40 @@ char getGLTFModelInfo(const char * filename, BufferInfo * data){
     data->index_type = getGLComponentTypeFromGLTFType(*GetInt(ObjGet(index_accessor, "componentType")));
     data->vertex_position_type = getGLComponentTypeFromGLTFType(*GetInt(ObjGet(vertex_position_accessor, "componentType")));
     data->vertex_normal_type = getGLComponentTypeFromGLTFType(*GetInt(ObjGet(vertex_normal_accessor, "componentType")));
-
     //---------- GET BUFFERS AND OFFSETS ----------//
     Value * bufferviews = ObjGet(parsed_json, "bufferViews");
     
     Value * index_bufferview = ArrayGet(bufferviews, *index_bufferview_index);
     Value * vertex_position_bufferview = ArrayGet(bufferviews, *vertex_position_bufferview_index);
     Value * vertex_normal_bufferview = ArrayGet(bufferviews, *vertex_normal_bufferview_index);
-    
+
     data->index_data_offset = *GetInt(ObjGet(index_bufferview, "byteOffset"));
     data->vertex_position_data_offset = *GetInt(ObjGet(vertex_position_bufferview, "byteOffset"));
     data->vertex_normal_data_offset = *GetInt(ObjGet(vertex_normal_bufferview, "byteOffset"));
-
+    
     const int * buffer_index = GetInt(ObjGet(index_bufferview, "buffer"));
 
     data->glb_size = sizeof(Vertex) * data->vertex_count + sizeof(unsigned short) * data->index_count + 2 * sizeof(GLTFChunkHeader) + sizeof(GLTFHeader) + strlen(gltf_json) + strlen(gltf_json) % GLB_CHUNK_BYTE_ALIGNMENT;
-    data->json_data = Stringify(parsed_json);
+    data->json_data = Stringify(parsed_json);    
     data->json_data_size = strlen(data->json_data);
 
+    
     //---------- GET BUFFERS URI ----------//
     Value * buffer = ArrayGet(ObjGet(parsed_json, "buffers"), *buffer_index);
     const char * uri = GetStr(ObjGet(buffer, "uri"));
     const char * last_directory = strrchr(filename, '/');
     memset(data->bin_buffer_uri, 0, 256);
+    
     strncpy(data->bin_buffer_uri, filename, (last_directory - filename) + 1);
     strncpy((last_directory - filename) + data->bin_buffer_uri + 1, uri, 256 - (last_directory - filename) - 1);
     ObjDel(buffer, "uri");
+
 
     return 0;
 }
 
 #ifdef NO_FREAD
+#ifndef _WIN32
 char loadGLTFBinaryData(BufferInfo * buffer_data, Mesh * result){
     int file_d = open(buffer_data->bin_buffer_uri, (unsigned char)0);
     if(file_d == -1){
@@ -171,6 +173,7 @@ char loadGLTFBinaryData(BufferInfo * buffer_data, Mesh * result){
 
     return 0;
 }
+#endif
 #else 
 char loadGLTFBinaryData(BufferInfo * buffer_data, Mesh * result){
     FILE * file = fopen(buffer_data->bin_buffer_uri, "rb");
