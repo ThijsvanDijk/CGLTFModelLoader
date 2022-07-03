@@ -14,8 +14,6 @@
 #define WIDTH 1920
 #define HEIGHT 1080
 
-#define NR_OF_PASSES 10000
-
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
 

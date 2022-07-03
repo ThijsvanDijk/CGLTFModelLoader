@@ -1,7 +1,5 @@
-#!/bin/bash
-
+# Get number of processing cores
 NOFPROC=`expr $(nproc) - 1`
-rm -R build
 mkdir build
 cmake -B build/ -S ./
 cmake --build build/ --config Release -j$NOFPROC

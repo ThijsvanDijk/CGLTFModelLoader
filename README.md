@@ -8,17 +8,11 @@ Currently only supported on Linux, I'm working on easy cross-platform building f
 - Reads both position and normal data for now, working on including texture coordinates now
 
 ## Dependencies
-- CGLM for fast math
+- CGLM for quick maths
 - ZZZJSON fastest JSON parser I could find
 - GLAD for loading OpenGL functions
 - GLFW for managing windows and user input
 
-## Build
-The library can be build with cmake like any other:
-```bash
-mkdir build && cd build
-cmake ../
-cmake --build .
-```
-This will generate a .a file for use with gcc compiler
+## Building
+There is an easy build script for Linux users that builds the entire project called: build.sh
 
