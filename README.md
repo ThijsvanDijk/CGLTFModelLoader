@@ -16,4 +16,4 @@ Currently only supported on Linux, I'm working on easy cross-platform building f
 ## Building
 There is an easy build script for Linux users that builds the entire project called: build-linux.sh
 
-There is an easy build script for Windows users that builds the entire project called: build-windows.sh
+There is an easy build script for Windows users that builds the entire project called: build-windows.bat
