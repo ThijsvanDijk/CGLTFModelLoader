@@ -55,5 +55,5 @@ dkms.conf
 build/
 lib/
 .vscode/
-resources/models
+resources/models/statue
 deps/*/build
