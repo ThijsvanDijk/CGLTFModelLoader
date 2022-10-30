@@ -27,7 +27,7 @@ void engine_camera_update_vectors(camera* camera){
 }
 
 void engine_camera_view_matrix(camera* camera, mat4 dest){
-    glm_vec3_add(camera->position, camera->front, dest[0]); // Using first column in dest as temp vector for addition
+    glm_vec3_add(camera->position, camera->front, dest[0]); // Using first column in dest as temporary store vector for addition result
     glm_lookat(camera->position, dest[0], camera->up, dest);   
 }
 

@@ -1,15 +1,18 @@
+// Standard Libs
 #include <stdlib.h>
 #include <stdio.h>
 #include <time.h>
+#include <limits.h>
 
+// 3rd Party Libs
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <cglm/cglm.h>
 
+// Custom Libs
 #include <3D/camera/camera.h>
 #include <3D/model/gltfLoader.h>
 #include <3D/shader/shader.h>
-
 
 #define WIDTH 1920
 #define HEIGHT 1080
@@ -64,119 +67,136 @@ int main(void) {
     double cpu_time;
     
     //----------GLFW Setup----------    
-    glfwInit();
+    // glfwInit();
 
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    glfwWindowHint(GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+    // glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+    // glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
+    // glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    // glfwWindowHint(GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
 
-    GLFWwindow* window = glfwCreateWindow(WIDTH, HEIGHT, "CGLTFModelLoader", NULL, NULL);
-    glfwMakeContextCurrent(window);
-    glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
-    glfwSetCursorPosCallback(window, mouse_callback);
-    glfwSetScrollCallback(window, scroll_callback);
-    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    // GLFWwindow* window = glfwCreateWindow(WIDTH, HEIGHT, "CGLTFModelLoader", NULL, NULL);
+    // glfwMakeContextCurrent(window);
+    // glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+    // glfwSetCursorPosCallback(window, mouse_callback);
+    // glfwSetScrollCallback(window, scroll_callback);
+    // glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
-    //----------OpenGL Setup----------
-    gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
+    // //----------OpenGL Setup----------
+    // gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
 
-    glViewport(0, 0, WIDTH, HEIGHT);
+    // glViewport(0, 0, WIDTH, HEIGHT);
 
-    camera cam;
-    engine_camera_default_values(&cam);
-    mat4 view;
-    engine_camera_view_matrix(&cam, view);
-    main_cam = &cam;
-    GLuint program = engine_shader_make_program_from_files("resources/shaders/vertex.glsl", "resources/shaders/fragment.glsl");
+    // camera cam;
+    // engine_camera_default_values(&cam);
+    // mat4 view;
+    // engine_camera_view_matrix(&cam, view);
+    // main_cam = &cam;
+    // GLuint program = engine_shader_make_program_from_files("resources/shaders/vertex.glsl", "resources/shaders/fragment.glsl");
 
     //----------Get GLTF Model----------
-    BufferInfo buffer_data;   
-    char code = getGLTFModelInfo("resources/models/crow/scene.gltf", &buffer_data);
-    if(code < 0){
-        fprintf(stderr, "Model failed to load, quitting...\n");
-        return -1;
-    }
+    char error_msg[256];
+    t = clock();
+    GLBModel* model;
+    char c = prepareGLBRead("resources/models/box/box.glb", model, error_msg);
 
-    Vertex vertices[buffer_data.vertex_count];
-    unsigned int indices[buffer_data.index_count];
-    Mesh mesh = {vertices, indices};
+    printf("Return Code: %d\n", c);
 
-    t = clock(); 
-    code = loadGLTFBinaryData(&buffer_data, &mesh);
     t = clock() - t;
     cpu_time = ((double)t) / CLOCKS_PER_SEC; 
-    printf("Loading GLTF bin data took: %f ms\n", cpu_time * 1000);
-    if(code < 0){
-        fprintf(stderr, "Binary data loading failed, quitting...\n");
-        return -1;
-    }
+    printf("Loading GLB Model info took: %f ms\n", cpu_time * 1000);
 
-    //----------Vertex Array Setup----------
-    GLuint VBO, VAO, EBO;
-    glGenVertexArrays(1, &VAO);
-    glGenBuffers(1, &VBO);
-    glGenBuffers(1, &EBO);
-    glBindVertexArray(VAO);
+    printf("Model Info:\n");
 
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+    printf("Generator: %s\n", model->asset.generator);
     
-    glVertexAttribPointer(0, 3, buffer_data.vertex_position_type, GL_FALSE, sizeof(Vertex), (void*)0);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(1, 3, buffer_data.vertex_normal_type, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, normal));
-    glEnableVertexAttribArray(1);
 
-    vec3 scale = {1.0f, 1.0f, 1.0f};
+    releaseModelInfo(model); // DO NOT REMOVE
 
-    unsigned int mvpLoc = glGetUniformLocation(program, "mvp");
-    unsigned int viewPosLoc = glGetUniformLocation(program, "viewPos");
+    // t = clock();
+    // GLTFModelInfo buffer_data;   
+    // char code = getGLTFModelInfo("resources/models/crow/scene.gltf", &buffer_data);
+    // if(code < 0){
+    //     fprintf(stderr, "Model failed to load, quitting...\n");
+    //     return -1;
+    // }
 
-    // -------------------------------------------------------
-    glEnable(GL_DEPTH_TEST);
-    while(!glfwWindowShouldClose(window)) {
-        glfwPollEvents();
+    // Vertex vertices[buffer_data.vertex_count];
+    // unsigned int indices[buffer_data.index_count];
+    // Mesh mesh = {vertices, indices}; 
+    // code = loadGLTFBinaryData(&buffer_data, &mesh);
+    // t = clock() - t;
+    // cpu_time = ((double)t) / CLOCKS_PER_SEC; 
+    // printf("Loading GLTF bin data took: %f ms\n", cpu_time * 1000);
+    // if(code < 0){
+    //     fprintf(stderr, "Binary data loading failed, quitting...\n");
+    //     return -1;
+    // }
 
-        float currentFrame = glfwGetTime();
-        deltaTime = currentFrame - lastFrame;
-        lastFrame = currentFrame;
+    // //----------Vertex Array Setup----------
+    // GLuint VBO, VAO, EBO;
+    // glGenVertexArrays(1, &VAO);
+    // glGenBuffers(1, &VBO);
+    // glGenBuffers(1, &EBO);
+    // glBindVertexArray(VAO);
 
-        process_input(window);
+    // glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    // glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
-        glClearColor(0.2f, 0.1f, 0.5f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        glUseProgram(program);
+    // glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    // glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+    
+    // glVertexAttribPointer(0, 3, buffer_data.vertex_position_type, GL_FALSE, sizeof(Vertex), (void*)0);
+    // glEnableVertexAttribArray(0);
+    // glVertexAttribPointer(1, 3, buffer_data.vertex_normal_type, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, normal));
+    // glEnableVertexAttribArray(1);
 
-        engine_camera_update_vectors(main_cam);
-        mat4 projection;
-        glm_perspective(glm_rad(main_cam->zoom), (float)WIDTH / (float)HEIGHT, 0.1f, 1000.0f, projection);
-        mat4 view = GLM_MAT4_IDENTITY_INIT;
-        engine_camera_view_matrix(main_cam, view);
+    // vec3 scale = {1.0f, 1.0f, 1.0f};
 
-        mat4 model = GLM_MAT4_IDENTITY_INIT;
-        vec3 translate = GLM_VEC3_ZERO_INIT;
+    // unsigned int mvpLoc = glGetUniformLocation(program, "mvp");
+    // unsigned int viewPosLoc = glGetUniformLocation(program, "viewPos");
 
-        glm_translate(model, translate);
-        glm_scale(model, scale);
+    // // -------------------------------------------------------
+    // glEnable(GL_DEPTH_TEST);
+    // while(!glfwWindowShouldClose(window)) {
+    //     glfwPollEvents();
+
+    //     float currentFrame = glfwGetTime();
+    //     deltaTime = currentFrame - lastFrame;
+    //     lastFrame = currentFrame;
+
+    //     process_input(window);
+
+    //     glClearColor(0.2f, 0.1f, 0.5f, 1.0f);
+    //     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    //     glUseProgram(program);
+
+    //     engine_camera_update_vectors(main_cam);
+    //     mat4 projection;
+    //     glm_perspective(glm_rad(main_cam->zoom), (float)WIDTH / (float)HEIGHT, 0.1f, 1000.0f, projection);
+    //     mat4 view = GLM_MAT4_IDENTITY_INIT;
+    //     engine_camera_view_matrix(main_cam, view);
+
+    //     mat4 model = GLM_MAT4_IDENTITY_INIT;
+    //     vec3 translate = GLM_VEC3_ZERO_INIT;
+
+    //     glm_translate(model, translate);
+    //     glm_scale(model, scale);
         
-        mat4 mvp = GLM_MAT4_IDENTITY_INIT; 
+    //     mat4 mvp = GLM_MAT4_IDENTITY_INIT; 
 
-        glm_mat4_mul(projection, view, mvp);
-        glm_mat4_mul(mvp, model, mvp);
+    //     glm_mat4_mul(projection, view, mvp);
+    //     glm_mat4_mul(mvp, model, mvp);
 
-        glUniformMatrix4fv(mvpLoc, 1, GL_FALSE, (float*)mvp);
-        glUniform3fv(viewPosLoc, 1, main_cam->position);
+    //     glUniformMatrix4fv(mvpLoc, 1, GL_FALSE, (float*)mvp);
+    //     glUniform3fv(viewPosLoc, 1, main_cam->position);
 
-        glBindVertexArray(VAO);
-        glDrawElements(GL_TRIANGLES, buffer_data.index_count, buffer_data.index_type, (void *)0);
-        glBindVertexArray(0);
+    //     glBindVertexArray(VAO);
+    //     glDrawElements(GL_TRIANGLES, buffer_data.index_count, buffer_data.index_type, (void *)0);
+    //     glBindVertexArray(0);
 
-        glfwSwapBuffers(window);
-    }
-    glfwTerminate();
+    //     glfwSwapBuffers(window);
+    // }
+    // glfwTerminate();
 
     return 0;
 }

@@ -1,154 +1,134 @@
 #include <3D/model/gltfLoader.h>
 
-static const ComponentType components[] = {
-    {GL_BYTE, 5120, 8},
-    {GL_UNSIGNED_BYTE, 5121, 8},
-    {GL_SHORT, 5122, 16},
-    {GL_UNSIGNED_SHORT, 5123, 16},
-    {GL_UNSIGNED_INT, 5125, 32},
-    {GL_FLOAT, 5126, 32}
-};
+uint8_t accessorTypeElementCounts[7] = {1, 2, 3, 4, 4, 9, 16};
+uint8_t accessorComponentTypeByteCounts[] = {1, 1, 2, 2, 0, 4, 4};
 
-unsigned int getGLComponentTypeFromGLTFType(unsigned int type){
-    for(unsigned int i = 0; i < sizeof(components)/sizeof(ComponentType); i++){
-        if(components[i].gltfType == type) return components[i].glType;
-    }
+GLTFAccessorType accessorTypeStrToInt(const char* type){
+    if(!strcmp(type, "SCALAR")) return GLTF_ACCESSOR_TYPE_SCALAR;
+    else if(!strcmp(type, "VEC2")) return GLTF_ACCESSOR_TYPE_VEC2;
+    else if(!strcmp(type, "VEC3")) return GLTF_ACCESSOR_TYPE_VEC3;
+    else if(!strcmp(type, "VEC4")) return GLTF_ACCESSOR_TYPE_VEC4;
+    else if(!strcmp(type, "MAT2")) return GLTF_ACCESSOR_TYPE_MAT2;
+    else if(!strcmp(type, "MAT3")) return GLTF_ACCESSOR_TYPE_MAT3;
+    else if(!strcmp(type, "MAT4")) return GLTF_ACCESSOR_TYPE_MAT4;
     return 0;
 }
-#ifndef _WIN32
-char convertGLTFToGLB(BufferInfo * info, Mesh * mesh, const char * filename){
-    if(loadGLTFBinaryData(info, mesh) == -1) return -1;
-    int file_d = open(filename, O_CREAT | O_WRONLY | O_NONBLOCK | O_TRUNC);
-    unsigned char spaces[4] = "    "; // For padding
-    unsigned char zeroes[4] = "\0\0\0\0";
-    unsigned int buffer_length = info->index_count * sizeof(unsigned short) + info->vertex_count * sizeof(Vertex);
 
-    GLTFHeader header = {
-        .magic = GLB_IDENTIFICATION_CODE,
-        .version = GLTF_VERSION,
-        .length = info->glb_size
-    };
-    GLTFChunkHeader json_header = {
-        .chunkType = GLB_CHUNK_STRUCTURED_JSON,
-        .chunkLength = info->json_data_size + info->json_data_size % GLB_CHUNK_BYTE_ALIGNMENT
-    };
-    GLTFChunkHeader buffer_header = {
-        .chunkType = GLB_CHUNK_BINARY_BUFFER,
-        .chunkLength = buffer_length + buffer_length % GLB_CHUNK_BYTE_ALIGNMENT
-    };
-
-    write(file_d, &header, sizeof(GLTFHeader));
-    write(file_d, &json_header, sizeof(GLTFChunkHeader));
-    write(file_d, info->json_data, info->json_data_size);
-    write(file_d, spaces, info->json_data_size % GLB_CHUNK_BYTE_ALIGNMENT);
-    write(file_d, &buffer_header, sizeof(GLTFChunkHeader));
-    write(file_d, mesh->vertices, info->vertex_count * sizeof(Vertex));
-    write(file_d, mesh->indices, info->index_count * sizeof(unsigned short));
-    write(file_d, zeroes, buffer_length % GLB_CHUNK_BYTE_ALIGNMENT);
-
-    close(file_d);
-    ReleaseAllocator(info->allocator);
-    return 0;
+void releaseModelInfo(GLBModel* model){
+    free(model);
 }
-#endif
 
-char getGLTFModelInfo(const char * filename, BufferInfo * data){
-    //---------- READING GLTF FILE ----------//
-    FILE *file = fopen(filename, "rb");
-    if(file == NULL){
-        fprintf(stderr, "Failed to open file: %s\n", filename);
+char prepareGLBRead(const char* file_name, GLBModel* model, char* error_msg){
+    //========== START ==========//
+    uint64_t bufferLengthAccumulator = 0;
+
+    printf("Cool1\n");
+
+    //---------- READING JSON FROM FILE ----------//
+    FILE* file = fopen(file_name, "rb");
+    if (!file){
+        fprintf(stderr, "Failed to open file: %s\n", file_name);
         return -1;
     }
-    fseek(file, 0L, SEEK_END);
-    const unsigned long file_size = ftell(file);
-    rewind(file);
 
-    char gltf_json[file_size + 1];
-    gltf_json[file_size] = 0;
-    fread(gltf_json, file_size, 1, file);
+    printf("Cool2\n");
 
+    GLBHeader header;
+    fread(&header, sizeof(GLBHeader), 1, file);
+    if(header.magic != GLB_IDENTIFICATION_CODE){
+        fprintf(stderr, "File is not GLTF");
+        return -2;
+    }  
 
-    fclose(file);
+    printf("Cool3\n");
+
+    GLBChunkHeader jsonHeader;
+    fread(&jsonHeader, sizeof(GLBChunkHeader), 1, file);
+    
+    char json_data[jsonHeader.chunkLength + 1];
+    fread(json_data, jsonHeader.chunkLength, 1, file);
+    json_data[jsonHeader.chunkLength] = '\0';
+    
     //---------- PARSING JSON ----------//
-    data->allocator = NewAllocator();
-    Value *parsed_json = NewValue(data->allocator);
-    unsigned char ret = ParseFast(parsed_json, gltf_json);
-    if(ret != 1){
-        return -1;
+    model->allocator = zj_NewAllocator();
+    zj_Value* parsed_json = NewValue(model->allocator);
+    if(zj_ParseFast(parsed_json, json_data) != 1) return -1;
+
+    printf("Cool\n");
+
+    //========== START READING MODEL ==========//
+    //---------- Asset ----------//
+    zj_Value* asset = zj_ObjGet(parsed_json, "asset");
+    // version
+    const char* asset_version = zj_GetStr(zj_ObjGet(asset, "version"));
+    sscanf(asset_version, "%hhu.%hhu", &model->asset.versionMajor, &model->asset.versionMinor);
+
+    // minVersion
+    model->asset.hasMinVersion = false;
+    zj_Value* minVersion = zj_ObjGet(asset, "minVersion");
+    if(minVersion != 0){
+        const char* minVersionStr = zj_GetStr(minVersion);
+        sscanf(minVersionStr, "%hhu.%hhu", &model->asset.minVersionMajor, &model->asset.minVersionMinor);
+        model->asset.hasMinVersion = true;
     }
 
-    //---------- GET ACCESSORS ----------//
-    Value * meshes = ObjGet(parsed_json, "meshes");
-    if(meshes == 0){
-        return -1;
-    }
-    Value * mesh_first_primitives = ArrayGet(ObjGet(ArrayGet(meshes, 0), "primitives"), 0);
+    printf("Cool\n");
 
-    const int * index_accessor_index = GetInt(ObjGet(mesh_first_primitives, "indices"));
-    if(index_accessor_index == 0){
-        return -1;
-    }
-
-    const int * vertex_position_accessor_index = GetInt(ObjGet(ObjGet(mesh_first_primitives, "attributes"), "POSITION"));
-    if(vertex_position_accessor_index == 0){
-        return -1;
+    // generator
+    model->asset.generatorLength = 0;
+    zj_Value* generator = zj_ObjGet(asset, "generator");
+    if(generator != 0){
+        model->asset.generator = zj_GetStr(generator);
+        model->asset.generatorLength = strlen(model->asset.generator) + 1;
+        bufferLengthAccumulator += model->asset.generatorLength;
     }
 
-    const int * vertex_normal_accessor_index = GetInt(ObjGet(ObjGet(mesh_first_primitives, "attributes"), "NORMAL"));
-    if(vertex_normal_accessor_index == 0) return -1;  
+    printf("Cool\n");
 
-    //---------- GET BUFFERVIEWS AND COUNTS ----------//
-    Value * accessors = ObjGet(parsed_json, "accessors");
-    
-    Value * index_accessor = ArrayGet(accessors, *index_accessor_index);
-    Value * vertex_position_accessor = ArrayGet(accessors, *vertex_position_accessor_index);
-    Value * vertex_normal_accessor = ArrayGet(accessors, *vertex_normal_accessor_index);
-    
-    data->index_count = *GetInt(ObjGet(index_accessor, "count"));    
-    data->vertex_count = *GetInt(ObjGet(vertex_position_accessor, "count"));
-    
-    const int * index_bufferview_index = GetInt(ObjGet(index_accessor, "bufferView"));
-    const int * vertex_position_bufferview_index = GetInt(ObjGet(vertex_position_accessor, "bufferView"));
-    const int * vertex_normal_bufferview_index = GetInt(ObjGet(vertex_normal_accessor, "bufferView"));
-    
-    data->index_type = getGLComponentTypeFromGLTFType(*GetInt(ObjGet(index_accessor, "componentType")));
-    data->vertex_position_type = getGLComponentTypeFromGLTFType(*GetInt(ObjGet(vertex_position_accessor, "componentType")));
-    data->vertex_normal_type = getGLComponentTypeFromGLTFType(*GetInt(ObjGet(vertex_normal_accessor, "componentType")));
-    //---------- GET BUFFERS AND OFFSETS ----------//
-    Value * bufferviews = ObjGet(parsed_json, "bufferViews");
-    
-    Value * index_bufferview = ArrayGet(bufferviews, *index_bufferview_index);
-    Value * vertex_position_bufferview = ArrayGet(bufferviews, *vertex_position_bufferview_index);
-    Value * vertex_normal_bufferview = ArrayGet(bufferviews, *vertex_normal_bufferview_index);
+    // copyright
+    model->asset.copyrightLength = 0;
+    zj_Value* copyright = zj_ObjGet(asset, "copyright");
+    if(copyright != 0){
+        model->asset.copyright = zj_GetStr(copyright);
+        model->asset.copyrightLength = strlen(model->asset.copyright) + 1;
+        bufferLengthAccumulator += model->asset.copyrightLength;
+    }
 
-    data->index_data_offset = *GetInt(ObjGet(index_bufferview, "byteOffset"));
-    data->vertex_position_data_offset = *GetInt(ObjGet(vertex_position_bufferview, "byteOffset"));
-    data->vertex_normal_data_offset = *GetInt(ObjGet(vertex_normal_bufferview, "byteOffset"));
+    //========== END READING MODEL ==========//
+    printf("Cool\n");
+    //========== START FILLING MODEL BUFFER ==========//
+    uint64_t bufferPointer = 0;
+
+    if(bufferLengthAccumulator != 0){
+        GLBModel* temp = model;
+        model = malloc(sizeof(GLBModel) + bufferLengthAccumulator);
+        memcpy(model, temp, sizeof(GLBModel));
+    }    
+    // Asset
+    if(model->asset.generatorLength > 0){
+        strncpy(&model->data[bufferPointer], model->asset.generator, model->asset.generatorLength);
+        model->asset.generator = &model->data[bufferPointer];
+        bufferPointer += model->asset.generatorLength;
+        
+    }
+
+    if(model->asset.copyrightLength > 0){
+        strncpy(&model->data[bufferPointer], model->asset.copyright, model->asset.copyrightLength);
+        model->asset.copyright = &model->data[bufferPointer];
+        bufferPointer += model->asset.copyrightLength;
+    }
+
+    // Delete zj_Allocator
+    zj_ReleaseAllocator(model->allocator);
     
-    const int * buffer_index = GetInt(ObjGet(index_bufferview, "buffer"));
 
-    data->glb_size = sizeof(Vertex) * data->vertex_count + sizeof(unsigned short) * data->index_count + 2 * sizeof(GLTFChunkHeader) + sizeof(GLTFHeader) + strlen(gltf_json) + strlen(gltf_json) % GLB_CHUNK_BYTE_ALIGNMENT;
-    data->json_data = Stringify(parsed_json);    
-    data->json_data_size = strlen(data->json_data);
-
-    
-    //---------- GET BUFFERS URI ----------//
-    Value * buffer = ArrayGet(ObjGet(parsed_json, "buffers"), *buffer_index);
-    const char * uri = GetStr(ObjGet(buffer, "uri"));
-    const char * last_directory = strrchr(filename, '/');
-    memset(data->bin_buffer_uri, 0, 256);
-    
-    strncpy(data->bin_buffer_uri, filename, (last_directory - filename) + 1);
-    strncpy((last_directory - filename) + data->bin_buffer_uri + 1, uri, 256 - (last_directory - filename) - 1);
-    ObjDel(buffer, "uri");
-
-
-    return 0;
 }
+
+
 
 #ifdef NO_FREAD
 #ifndef _WIN32
-char loadGLTFBinaryData(BufferInfo * buffer_data, Mesh * result){
+char loadGLTFBinaryData(GLTFModelInfo * buffer_data, Mesh * result){
     int file_d = open(buffer_data->bin_buffer_uri, (unsigned char)0);
     if(file_d == -1){
         fprintf(stderr, "Failed to open file: %s\n", buffer_data->bin_buffer_uri);
@@ -175,7 +155,7 @@ char loadGLTFBinaryData(BufferInfo * buffer_data, Mesh * result){
 }
 #endif
 #else 
-char loadGLTFBinaryData(BufferInfo * buffer_data, Mesh * result){
+char loadGLTFBinaryData(GLTFModelInfo * buffer_data, Mesh * result){
     FILE * file = fopen(buffer_data->bin_buffer_uri, "rb");
     if(file == NULL){
         fprintf(stderr, "Failed to open file: %s\n", buffer_data->bin_buffer_uri);
@@ -198,3 +178,117 @@ char loadGLTFBinaryData(BufferInfo * buffer_data, Mesh * result){
     return 0;
 }
 #endif
+
+/**
+ * @brief Get's a GLTF Model's info before doing the read. This is done so the reading can be as optimised as possible.
+ * 
+ * @param model_info a struct with model info where the info about the model will be stored
+ * @return 0 if succes, <0 if not
+ */
+// char prepareGLBRead(const char* file_name, GLBModel* info, char* error_msg){
+//     //---------- READING JSON FROM FILE ----------//
+//     FILE* file = fopen(file_name, "rb");
+//     if (!file){
+//         fprintf(stderr, "Failed to open file: %s\n", file_name);
+//         return -1;
+//     }
+//     fread(&info->header, sizeof(GLBHeader), 1, file);
+//     if(info->header.magic != GLB_IDENTIFICATION_CODE){
+//         fprintf(stderr, "File is not GLTF");
+//         return -2;
+//     }  
+//     fread(&info->jsonChunkHeader, sizeof(GLBChunkHeader), 1, file);
+//     char json_data[info->jsonChunkHeader.chunkLength + 1];
+//     fread(json_data, info->jsonChunkHeader.chunkLength, 1, file);
+//     json_data[info->jsonChunkHeader.chunkLength] = '\0';
+    
+//     //---------- PARSING JSON ----------//
+//     info->allocator = zj_NewAllocator();
+//     zj_Value* parsed_json = NewValue(info->allocator);
+//     if(zj_ParseFast(parsed_json, json_data) != 1) return -1;
+
+//     //---------- GETTING ASSET INFO ----------//
+//     zj_Value* asset = zj_ObjGet(parsed_json, "asset");
+    
+//     // version
+//     const char* asset_version = zj_GetStr(zj_ObjGet(asset, "version"));
+//     sscanf(asset_version, "%hhu.%hhu", &info->asset.versionMajor, &info->asset.versionMinor);
+
+//     // minVersion
+//     info->asset.hasMinVersion = false;
+//     zj_Value* minVersion = zj_ObjGet(asset, "minVersion");
+//     if(minVersion != 0){
+//         const char* minVersionStr = zj_GetStr(minVersion);
+//         sscanf(minVersionStr, "%hhu.%hhu", &info->asset.minVersionMajor, &info->asset.minVersionMinor);
+//         info->asset.hasMinVersion = true;
+//     }
+
+//     // generator
+//     info->asset.hasGenerator = false;
+//     zj_Value* generator = zj_ObjGet(asset, "generator");
+//     if(generator != 0){
+//         info->asset.generator = zj_GetStr(generator);
+//         info->asset.hasGenerator = true;
+//     }
+
+//     // copyright
+//     info->asset.hasCopyright = false;
+//     zj_Value* copyright = zj_ObjGet(asset, "copyright");
+//     if(generator != 0){
+//         info->asset.generator = zj_GetStr(generator);
+//         info->asset.hasGenerator = true;
+//     }
+
+//     //---------- GETTING ACCESSOR INFO ----------//
+//     zj_Value* accessors = zj_ObjGet(parsed_json, "accessors");
+//     info->accessorCount = 0;
+//     while(zj_ArrayGet(accessors, info->accessorCount) != 0) info->accessorCount++;
+//     info->accessors = malloc(sizeof(GLTFAccessor) * info->accessorCount);
+//     for(uint32_t i = 0; i < info->accessorCount; i++){
+//         zj_Value* accessor = zj_ArrayGet(accessors, i);
+
+//         // bufferView
+//         info->accessors[i].hasBufferView = 0;
+//         zj_Value* bufferView = zj_ObjGet(accessor, "bufferView");
+//         if(bufferView != 0){
+//             info->accessors[i].hasBufferView = true;
+//             info->accessors[i].bufferView = *zj_GetInt(bufferView);
+//         }
+
+//         // byteOffset
+//         info->accessors[i].byteOffset = 0;
+//         zj_Value* byteOffset = zj_ObjGet(accessor, "byteOffset");
+//         if(byteOffset != 0) info->accessors[i].byteOffset = *zj_GetInt(byteOffset);
+
+//         // componentType
+//         info->accessors[i].componentType = *zj_GetInt(zj_ObjGet(accessor, "componentType")) - 5120;
+
+//         // normalized
+//         info->accessors[i].normalized = false;
+//         zj_Value* normalized = zj_ObjGet(accessor, "normalized");
+//         if(normalized != 0) info->accessors[i].normalized = *zj_GetBool(normalized);
+
+//         // count
+//         info->accessors[i].count = *zj_GetInt(zj_ObjGet(accessor, "count"));
+
+//         // type
+//         const char* type = zj_GetStr(zj_ObjGet(accessor, "type"));
+//         info->accessors[i].type = accessorTypeStrToInt(type);
+
+//         // max
+//         info->accessors[i].hasMax = 0;
+//         zj_Value* max = zj_ObjGet(accessor, "max");
+//         if(max != 0){
+//             // info->accessors[i].max = malloc(100);
+//         }
+//     }
+
+
+//     //---------- GETTING SCENES ----------//
+//     zj_Value* scenes_value = zj_ObjGet(parsed_json, "scenes");
+//     uint32_t scene_counter = 0;
+//     while (zj_ArrayGet(scenes_value, scene_counter) != 0)
+//     {
+//         scene_counter++;
+//     }
+// }

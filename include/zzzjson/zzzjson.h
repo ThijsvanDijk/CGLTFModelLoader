@@ -11,6 +11,8 @@
 // 0 经典模式（ C语言 ），所有API为 zj_ 开头
 // 1 短API模式（ C语言 ），所有API没有 zj_ 开头，有可能会跟其它头文件冲突，因为
 // C语言 没有命名空间
+#define zj_SHORT_API 0
+
 #ifndef zj_API_MODE
 #define zj_API_MODE 1
 #endif
