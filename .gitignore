@@ -55,5 +55,5 @@ dkms.conf
 build/
 lib/
 .vscode/
-resources/models/statue
+resources/models/washington
 deps/*/build

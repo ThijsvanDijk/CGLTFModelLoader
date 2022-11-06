@@ -1,183 +1,344 @@
-#include <3D/model/gltfLoader.h>
+// #include <3D/model/gltf/gltf.h>
 
-uint8_t accessorTypeElementCounts[7] = {1, 2, 3, 4, 4, 9, 16};
-uint8_t accessorComponentTypeByteCounts[] = {1, 1, 2, 2, 0, 4, 4};
+// uint8_t accessorTypeElementCounts[7] = {1, 2, 3, 4, 4, 9, 16};
+// uint8_t accessorComponentTypeByteCounts[] = {1, 1, 2, 2, 0, 4, 4};
 
-GLTFAccessorType accessorTypeStrToInt(const char* type){
-    if(!strcmp(type, "SCALAR")) return GLTF_ACCESSOR_TYPE_SCALAR;
-    else if(!strcmp(type, "VEC2")) return GLTF_ACCESSOR_TYPE_VEC2;
-    else if(!strcmp(type, "VEC3")) return GLTF_ACCESSOR_TYPE_VEC3;
-    else if(!strcmp(type, "VEC4")) return GLTF_ACCESSOR_TYPE_VEC4;
-    else if(!strcmp(type, "MAT2")) return GLTF_ACCESSOR_TYPE_MAT2;
-    else if(!strcmp(type, "MAT3")) return GLTF_ACCESSOR_TYPE_MAT3;
-    else if(!strcmp(type, "MAT4")) return GLTF_ACCESSOR_TYPE_MAT4;
-    return 0;
-}
+// GLTFAccessorType accessorTypeStrToInt(const char* type){
+//     if(!strcmp(type, "SCALAR")) return GLTF_ACCESSOR_TYPE_SCALAR;
+//     else if(!strcmp(type, "VEC2")) return GLTF_ACCESSOR_TYPE_VEC2;
+//     else if(!strcmp(type, "VEC3")) return GLTF_ACCESSOR_TYPE_VEC3;
+//     else if(!strcmp(type, "VEC4")) return GLTF_ACCESSOR_TYPE_VEC4;
+//     else if(!strcmp(type, "MAT2")) return GLTF_ACCESSOR_TYPE_MAT2;
+//     else if(!strcmp(type, "MAT3")) return GLTF_ACCESSOR_TYPE_MAT3;
+//     else if(!strcmp(type, "MAT4")) return GLTF_ACCESSOR_TYPE_MAT4;
+//     return 0;
+// }
 
-void releaseModelInfo(GLBModel* model){
-    free(model);
-}
+// char prepareGLBRead(const char* file_name, GLBModel* result, char* error_msg){
+//     //========== START ==========//
+//     uint64_t bufferLengthAccumulator = 0;
 
-char prepareGLBRead(const char* file_name, GLBModel* model, char* error_msg){
-    //========== START ==========//
-    uint64_t bufferLengthAccumulator = 0;
+//     //---------- READING JSON FROM FILE ----------//
+//     FILE* file = fopen(file_name, "rb");
+//     if (!file){
+//         fprintf(stderr, "Failed to open file: %s\n", file_name);
+//         return -1;
+//     }
+//     GLBHeader header;
+//     fread(&header, sizeof(GLBHeader), 1, file);
+//     if(header.magic != GLB_IDENTIFICATION_CODE){
+//         fprintf(stderr, "File is not GLTF");
+//         return -2;
+//     }  
+//     GLBChunkHeader jsonHeader;
+//     fread(&jsonHeader, sizeof(GLBChunkHeader), 1, file);
+//     char json_data[jsonHeader.chunkLength + 1];
+//     fread(json_data, jsonHeader.chunkLength, 1, file);
+//     json_data[jsonHeader.chunkLength] = '\0';
 
-    printf("Cool1\n");
+//     //---------- PARSING JSON ----------//
+//     result->allocator = zj_NewAllocator();
+//     zj_Value* parsed_json = NewValue(result->allocator);
+//     if(zj_ParseFast(parsed_json, json_data) != 1) return -1;
 
-    //---------- READING JSON FROM FILE ----------//
-    FILE* file = fopen(file_name, "rb");
-    if (!file){
-        fprintf(stderr, "Failed to open file: %s\n", file_name);
-        return -1;
-    }
+//     //========== START READING MODEL ==========//
+//     //---------- Asset ----------//
+//     zj_Value* asset = zj_ObjGet(parsed_json, "asset");
+//     // version
+//     const char* asset_version = zj_GetStr(zj_ObjGet(asset, "version"));
+//     sscanf(asset_version, "%hhu.%hhu", &result->asset.versionMajor, &result->asset.versionMinor);
 
-    printf("Cool2\n");
+//     // minVersion
+//     result->asset.hasMinVersion = false;
+//     zj_Value* minVersion = zj_ObjGet(asset, "minVersion");
+//     if(minVersion != 0){
+//         const char* minVersionStr = zj_GetStr(minVersion);
+//         sscanf(minVersionStr, "%hhu.%hhu", &result->asset.minVersionMajor, &result->asset.minVersionMinor);
+//         result->asset.hasMinVersion = true;
+//     }
 
-    GLBHeader header;
-    fread(&header, sizeof(GLBHeader), 1, file);
-    if(header.magic != GLB_IDENTIFICATION_CODE){
-        fprintf(stderr, "File is not GLTF");
-        return -2;
-    }  
+//     // generator
+//     result->asset.generatorLength = 0;
+//     zj_Value* generator = zj_ObjGet(asset, "generator");
+//     if(generator != 0){
+//         result->asset.generator = zj_GetStr(generator);
+//         result->asset.generatorLength = strlen(result->asset.generator) + 1;
+//         bufferLengthAccumulator += result->asset.generatorLength;
+//     }
 
-    printf("Cool3\n");
+//     // copyright
+//     result->asset.copyrightLength = 0;
+//     zj_Value* copyright = zj_ObjGet(asset, "copyright");
+//     if(copyright != 0){
+//         result->asset.copyright = zj_GetStr(copyright);
+//         result->asset.copyrightLength = strlen(result->asset.copyright) + 1;
+//         bufferLengthAccumulator += result->asset.copyrightLength;
+//     }
 
-    GLBChunkHeader jsonHeader;
-    fread(&jsonHeader, sizeof(GLBChunkHeader), 1, file);
-    
-    char json_data[jsonHeader.chunkLength + 1];
-    fread(json_data, jsonHeader.chunkLength, 1, file);
-    json_data[jsonHeader.chunkLength] = '\0';
-    
-    //---------- PARSING JSON ----------//
-    model->allocator = zj_NewAllocator();
-    zj_Value* parsed_json = NewValue(model->allocator);
-    if(zj_ParseFast(parsed_json, json_data) != 1) return -1;
+//     //---------- Scenes ----------//
+//     zj_Value* scenes = zj_ObjGet(parsed_json, "scenes");
+//     // Go through array
+//     result->scenesLength = 0;
+//     zj_Value* currentScene;
+//     while(currentScene = zj_ArrayGet(scenes, result->scenesLength)){
+//         result->scenesLength++;
 
-    printf("Cool\n");
+//         // Count the nodes
+//         zj_Value* nodes = zj_ObjGet(currentScene, "nodes");
+//         if(nodes){
+//             uint32_t node_counter = 0;
+//             zj_Value* currentNode;
+//             while(currentNode = zj_ArrayGet(nodes, node_counter)){
+//                 node_counter++;
+//                 bufferLengthAccumulator += sizeof(uint32_t);
+//             }
+//         }
 
-    //========== START READING MODEL ==========//
-    //---------- Asset ----------//
-    zj_Value* asset = zj_ObjGet(parsed_json, "asset");
-    // version
-    const char* asset_version = zj_GetStr(zj_ObjGet(asset, "version"));
-    sscanf(asset_version, "%hhu.%hhu", &model->asset.versionMajor, &model->asset.versionMinor);
+//         // Check for scene name
+//         zj_Value* scene_name = zj_ObjGet(currentScene, "name");
+//         if(scene_name){
+//             const char * name_str = zj_GetStr(scene_name);
+//             bufferLengthAccumulator += strlen(name_str) + 1;
+//         }
 
-    // minVersion
-    model->asset.hasMinVersion = false;
-    zj_Value* minVersion = zj_ObjGet(asset, "minVersion");
-    if(minVersion != 0){
-        const char* minVersionStr = zj_GetStr(minVersion);
-        sscanf(minVersionStr, "%hhu.%hhu", &model->asset.minVersionMajor, &model->asset.minVersionMinor);
-        model->asset.hasMinVersion = true;
-    }
+//         // Add size of scene struct to buffer length
+//         bufferLengthAccumulator += sizeof(GLTFScene);
+//     }
 
-    printf("Cool\n");
 
-    // generator
-    model->asset.generatorLength = 0;
-    zj_Value* generator = zj_ObjGet(asset, "generator");
-    if(generator != 0){
-        model->asset.generator = zj_GetStr(generator);
-        model->asset.generatorLength = strlen(model->asset.generator) + 1;
-        bufferLengthAccumulator += model->asset.generatorLength;
-    }
+//     //---------- Nodes ----------//
+//     zj_Value* nodes = zj_ObjGet(parsed_json, "nodes");
 
-    printf("Cool\n");
+//     // Go through array
+//     result->nodesLength = 0;
+//     zj_Value* currentNode;
+//     while(currentNode = zj_ArrayGet(nodes, result->nodesLength)){
+//         result->nodesLength++;
 
-    // copyright
-    model->asset.copyrightLength = 0;
-    zj_Value* copyright = zj_ObjGet(asset, "copyright");
-    if(copyright != 0){
-        model->asset.copyright = zj_GetStr(copyright);
-        model->asset.copyrightLength = strlen(model->asset.copyright) + 1;
-        bufferLengthAccumulator += model->asset.copyrightLength;
-    }
+//         // Count the children
+//         zj_Value* children = zj_ObjGet(currentNode, "children");
+//         if(children){
+//             uint32_t child_counter = 0;
+//             zj_Value* currentChild;
+//             while(currentChild = zj_ArrayGet(children, child_counter)){
+//                 child_counter++;
+//                 bufferLengthAccumulator += sizeof(uint32_t);
+//             }
+//         }
+//         // Get length of name string
+//         zj_Value* node_name = zj_ObjGet(currentNode, "name");
+//         if(node_name){
+//             const char * name_str = zj_GetStr(node_name);
+//             bufferLengthAccumulator += strlen(name_str) + 1;
+//         }
 
-    //========== END READING MODEL ==========//
-    printf("Cool\n");
-    //========== START FILLING MODEL BUFFER ==========//
-    uint64_t bufferPointer = 0;
-
-    if(bufferLengthAccumulator != 0){
-        GLBModel* temp = model;
-        model = malloc(sizeof(GLBModel) + bufferLengthAccumulator);
-        memcpy(model, temp, sizeof(GLBModel));
-    }    
-    // Asset
-    if(model->asset.generatorLength > 0){
-        strncpy(&model->data[bufferPointer], model->asset.generator, model->asset.generatorLength);
-        model->asset.generator = &model->data[bufferPointer];
-        bufferPointer += model->asset.generatorLength;
+//         bufferLengthAccumulator += sizeof(GLTFNode);
         
-    }
+//     }
 
-    if(model->asset.copyrightLength > 0){
-        strncpy(&model->data[bufferPointer], model->asset.copyright, model->asset.copyrightLength);
-        model->asset.copyright = &model->data[bufferPointer];
-        bufferPointer += model->asset.copyrightLength;
-    }
+//     //========== END READING MODEL ==========//
+//     //========== START FILLING MODEL BUFFER ==========//
+//     uint64_t bufferPointer = 0;
 
-    // Delete zj_Allocator
-    zj_ReleaseAllocator(model->allocator);
+//     // printf("Buffer Size: %lu\n", bufferLengthAccumulator);
+//     // printf("Total size of model in memory when loaded: %lu\n", bufferLengthAccumulator + sizeof(GLBModel));
+//     if(bufferLengthAccumulator != 0){
+//         result->data = malloc(bufferLengthAccumulator); // ALLOCATION, DO NOT FORGET!
+//     }    
+//     //---------- Asset ----------//
+//     if(result->asset.generatorLength > 0){
+//         strncpy(&result->data[bufferPointer], result->asset.generator, result->asset.generatorLength);
+//         result->asset.generator = &result->data[bufferPointer];
+//         bufferPointer += result->asset.generatorLength;        
+//     }
+
+//     if(result->asset.copyrightLength > 0){
+//         strncpy(&result->data[bufferPointer], result->asset.copyright, result->asset.copyrightLength);
+//         result->asset.copyright = &result->data[bufferPointer];
+//         bufferPointer += result->asset.copyrightLength;
+//     }
     
+//     //---------- Scenes ----------//
+//     result->scenes = (GLTFScene*)&result->data[bufferPointer];
+//     bufferPointer += result->scenesLength * sizeof(GLTFScene);
+//     for(uint32_t scene = 0; scene < result->scenesLength; scene++){
+//         currentScene = zj_ArrayGet(scenes, scene);
+//         // Count the nodes
+//         result->scenes[scene].nodesLength = 0;
+//         zj_Value* nodes = zj_ObjGet(currentScene, "nodes");
+//         if(nodes){
+//             uint64_t tempBufferPointer = bufferPointer;
+//             uint32_t node_counter = 0;
+//             zj_Value* currentNode;
+//             while(currentNode = zj_ArrayGet(nodes, node_counter)){
+//                 node_counter++;
+//                 memcpy(&result->data[bufferPointer], zj_GetInt(currentNode), sizeof(uint32_t));
+//                 bufferPointer += sizeof(uint32_t);
+//             }
+//             result->scenes[scene].nodesLength = node_counter;
+//             result->scenes[scene].nodes = (uint32_t*)&result->data[tempBufferPointer];
+//         }
 
-}
+//         // Check for scene name
+//         result->scenes[scene].nameLength = 0;
+//         zj_Value* scene_name = zj_ObjGet(currentScene, "name");
+//         if(scene_name){
+//             const char * name_str = zj_GetStr(scene_name);
+//             uint32_t name_str_length = strlen(name_str) + 1;
+//             strncpy(&result->data[bufferPointer], name_str, name_str_length);
+//             result->scenes[scene].nameLength = name_str_length;
+//             result->scenes[scene].name = &result->data[bufferPointer];
+//             bufferPointer += name_str_length;
+//         }
+//     }
+
+//     //---------- Nodes ----------//
+//     result->nodes = (GLTFNode*)&result->data[bufferPointer];
+//     bufferPointer += result->nodesLength * sizeof(GLTFNode);
+//     for(uint32_t node = 0; node < result->nodesLength; node++){
+//         currentNode = zj_ArrayGet(nodes, node);
+//         result->nodes[node].childrenLength = 0;
+//         // Children
+//         zj_Value * children = zj_ObjGet(currentNode, "children");
+//         if(children){
+//             uint64_t tempBufferPointer = bufferPointer;
+//             result->nodes[node].childrenLength = 0;
+//             zj_Value* currentChild;
+//             while(currentChild = zj_ArrayGet(children, result->nodes[node].childrenLength)){
+//                 result->nodes[node].childrenLength++;
+//                 memcpy(&result->data[bufferPointer], zj_GetInt(currentChild), sizeof(uint32_t));
+//                 bufferPointer += sizeof(uint32_t);
+//             }
+//             result->nodes[node].childrenLength = result->nodes[node].childrenLength;
+//             result->nodes[node].children = (uint32_t*)(&result->data[tempBufferPointer]);
+//         }
+//         // Name
+//         result->nodes[node].nameLength = 0;
+//         zj_Value* node_name = zj_ObjGet(currentNode, "name");
+//         if(node_name){
+//             const char * name_str = zj_GetStr(node_name);
+//             uint32_t name_str_length = strlen(name_str) + 1;
+//             strncpy(&result->data[bufferPointer], name_str, name_str_length);
+//             result->nodes[node].nameLength = name_str_length;
+//             result->nodes[node].name = &result->data[bufferPointer];
+//             bufferPointer += name_str_length;
+//         }
+//         // Mesh
+//         result->nodes[node].hasMesh = false;
+//         zj_Value* node_mesh = zj_ObjGet(currentNode, "mesh");
+//         if(node_mesh){
+//             result->nodes[node].mesh = *zj_GetInt(node_mesh);
+//             result->nodes[node].hasMesh = true;
+//         }
+//         // Matrix
+//         result->nodes[node].hasMatrix = false;
+//         mat4 identity = GLM_MAT4_IDENTITY_INIT;
+//         memcpy(&result->nodes[node].matrix, &identity, sizeof(mat4)); // Set default
+//         zj_Value* node_matrix = zj_ObjGet(currentNode, "matrix");
+//         if(node_matrix){
+//             for(uint8_t i = 0; i < sizeof(mat4)/sizeof(float); i++){
+//                 memcpy(&result->nodes[node].matrix[i], zj_GetInt(zj_ArrayGet(node_matrix, i)), sizeof(float));
+//             }
+//             result->nodes[node].hasMatrix = true;
+//         }
+//         // TRS
+//         result->nodes[node].hasTranslation = false;
+//         result->nodes[node].hasRotation = false;
+//         result->nodes[node].hasScale = false;
+
+//         vec3 translation_default = GLM_VEC3_ZERO_INIT;
+//         vec4 rotation_default = {0, 0, 0, 1};
+//         vec3 scale_default = GLM_VEC3_ONE_INIT;
+
+//         memcpy(&result->nodes[node].translation, &translation_default, sizeof(vec3));
+//         memcpy(&result->nodes[node].rotation, &rotation_default, sizeof(vec4));
+//         memcpy(&result->nodes[node].scale, &scale_default, sizeof(vec3));
+
+//         zj_Value* node_translation = zj_ObjGet(currentNode, "translation");
+//         zj_Value* node_rotation = zj_ObjGet(currentNode, "rotation");
+//         zj_Value* node_scale = zj_ObjGet(currentNode, "scale");
+        
+//         if(node_translation){
+//             for(uint8_t i = 0; i < sizeof(vec3)/sizeof(float); i++){
+//                 memcpy(&result->nodes[node].translation[i], zj_GetInt(zj_ArrayGet(node_translation, i)), sizeof(float));
+//             }
+//             result->nodes[node].hasTranslation = true;
+//         }
+//         if(node_rotation){
+//             for(uint8_t i = 0; i < sizeof(vec4)/sizeof(float); i++){
+//                 memcpy(&result->nodes[node].rotation[i], zj_GetInt(zj_ArrayGet(node_rotation, i)), sizeof(float));
+//             }
+//             result->nodes[node].hasRotation = true;
+//         }
+//         if(node_translation){
+//             for(uint8_t i = 0; i < sizeof(vec3)/sizeof(float); i++){
+//                 memcpy(&result->nodes[node].scale[i], zj_GetInt(zj_ArrayGet(node_scale, i)), sizeof(float));
+//             }
+//             result->nodes[node].hasScale = true;
+//         }
+
+//     }
+
+//     // Free Json Allocator
+//     zj_ReleaseAllocator(result->allocator);
+
+//     return 0;
+// }
 
 
 
-#ifdef NO_FREAD
-#ifndef _WIN32
-char loadGLTFBinaryData(GLTFModelInfo * buffer_data, Mesh * result){
-    int file_d = open(buffer_data->bin_buffer_uri, (unsigned char)0);
-    if(file_d == -1){
-        fprintf(stderr, "Failed to open file: %s\n", buffer_data->bin_buffer_uri);
-        return -1;
-    }
-    unsigned char loaded_data[sizeof(Vertex) * buffer_data->vertex_count];
+// #ifdef NO_FREAD
+// #ifndef _WIN32
+// char loadGLTFBinaryData(GLTFModelInfo * buffer_data, Mesh * result){
+//     int file_d = open(buffer_data->bin_buffer_uri, (unsigned char)0);
+//     if(file_d == -1){
+//         fprintf(stderr, "Failed to open file: %s\n", buffer_data->bin_buffer_uri);
+//         return -1;
+//     }
+//     unsigned char loaded_data[sizeof(Vertex) * buffer_data->vertex_count];
 
-    lseek(file_d, buffer_data->vertex_position_data_offset, SEEK_SET);
-    read(file_d, loaded_data, sizeof(vec3) * buffer_data->vertex_count);
+//     lseek(file_d, buffer_data->vertex_position_data_offset, SEEK_SET);
+//     read(file_d, loaded_data, sizeof(vec3) * buffer_data->vertex_count);
 
-    lseek(file_d, buffer_data->vertex_normal_data_offset, SEEK_SET);
-    read(file_d, loaded_data + buffer_data->vertex_normal_data_offset, sizeof(vec3) * buffer_data->vertex_count);
+//     lseek(file_d, buffer_data->vertex_normal_data_offset, SEEK_SET);
+//     read(file_d, loaded_data + buffer_data->vertex_normal_data_offset, sizeof(vec3) * buffer_data->vertex_count);
 
-    lseek(file_d, buffer_data->index_data_offset, SEEK_SET);
-    read(file_d, result->indices, sizeof(buffer_data->index_type) * buffer_data->index_count);
+//     lseek(file_d, buffer_data->index_data_offset, SEEK_SET);
+//     read(file_d, result->indices, sizeof(buffer_data->index_type) * buffer_data->index_count);
 
-    unsigned int i;
-    for(i = 0; i < buffer_data->vertex_count; i++){
-        memcpy(&result->vertices[i].position, &loaded_data[i * sizeof(vec3) + buffer_data->vertex_position_data_offset], sizeof(vec3));
-        memcpy(&result->vertices[i].normal, &loaded_data[i * sizeof(vec3) + buffer_data->vertex_normal_data_offset], sizeof(vec3));
-    }
+//     unsigned int i;
+//     for(i = 0; i < buffer_data->vertex_count; i++){
+//         memcpy(&result->vertices[i].position, &loaded_data[i * sizeof(vec3) + buffer_data->vertex_position_data_offset], sizeof(vec3));
+//         memcpy(&result->vertices[i].normal, &loaded_data[i * sizeof(vec3) + buffer_data->vertex_normal_data_offset], sizeof(vec3));
+//     }
 
-    return 0;
-}
-#endif
-#else 
-char loadGLTFBinaryData(GLTFModelInfo * buffer_data, Mesh * result){
-    FILE * file = fopen(buffer_data->bin_buffer_uri, "rb");
-    if(file == NULL){
-        fprintf(stderr, "Failed to open file: %s\n", buffer_data->bin_buffer_uri);
-        return -1;
-    }
+//     return 0;
+// }
+// #endif
+// #else 
+// char loadGLTFBinaryData(GLTFModelInfo * buffer_data, Mesh * result){
+//     FILE * file = fopen(buffer_data->bin_buffer_uri, "rb");
+//     if(file == NULL){
+//         fprintf(stderr, "Failed to open file: %s\n", buffer_data->bin_buffer_uri);
+//         return -1;
+//     }
 
-    fseek(file, buffer_data->vertex_position_data_offset, SEEK_SET);
-    for(unsigned int i = 0; i < buffer_data->vertex_count; i++){
-        fread(result->vertices[i].position, sizeof(vec3), 1, file);
-    }
+//     fseek(file, buffer_data->vertex_position_data_offset, SEEK_SET);
+//     for(unsigned int i = 0; i < buffer_data->vertex_count; i++){
+//         fread(result->vertices[i].position, sizeof(vec3), 1, file);
+//     }
 
-    fseek(file, buffer_data->vertex_normal_data_offset, SEEK_SET);
-    for(unsigned int i = 0; i < buffer_data->vertex_count; i++){
-        fread(result->vertices[i].normal, sizeof(vec3), 1, file);
-    }
+//     fseek(file, buffer_data->vertex_normal_data_offset, SEEK_SET);
+//     for(unsigned int i = 0; i < buffer_data->vertex_count; i++){
+//         fread(result->vertices[i].normal, sizeof(vec3), 1, file);
+//     }
 
-    fseek(file, buffer_data->index_data_offset, SEEK_SET);
-    fread(result->indices, sizeof(unsigned short), buffer_data->index_count, file);
+//     fseek(file, buffer_data->index_data_offset, SEEK_SET);
+//     fread(result->indices, sizeof(unsigned short), buffer_data->index_count, file);
 
-    return 0;
-}
-#endif
+//     return 0;
+// }
+// #endif
 
 /**
  * @brief Get's a GLTF Model's info before doing the read. This is done so the reading can be as optimised as possible.

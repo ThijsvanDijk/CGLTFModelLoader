@@ -11,11 +11,13 @@
 
 // Custom Libs
 #include <3D/camera/camera.h>
-#include <3D/model/gltfLoader.h>
+#include <3D/model/gltf/gltf.h>
 #include <3D/shader/shader.h>
 
 #define WIDTH 1920
 #define HEIGHT 1080
+
+#define NOFITERATIONS 1
 
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
@@ -63,8 +65,8 @@ void process_input(GLFWwindow* window){
 }
 
 int main(void) {
-    clock_t t;
-    double cpu_time;
+    clock_t start_t, end_t;
+    double total_t;
     
     //----------GLFW Setup----------    
     // glfwInit();
@@ -93,24 +95,26 @@ int main(void) {
     // main_cam = &cam;
     // GLuint program = engine_shader_make_program_from_files("resources/shaders/vertex.glsl", "resources/shaders/fragment.glsl");
 
-    //----------Get GLTF Model----------
-    char error_msg[256];
-    t = clock();
-    GLBModel* model;
-    char c = prepareGLBRead("resources/models/box/box.glb", model, error_msg);
+    //----------Get GLTF Model----------//
+    start_t = clock();
 
-    printf("Return Code: %d\n", c);
+    for(uint64_t i = 0; i < NOFITERATIONS; i++){
+        GLTFModel model;
+        char c = gltf_modelLoad("resources/models/box/box.glb", &model);
+        free(model.data);
+    }
+    end_t = clock();
 
-    t = clock() - t;
-    cpu_time = ((double)t) / CLOCKS_PER_SEC; 
-    printf("Loading GLB Model info took: %f ms\n", cpu_time * 1000);
-
-    printf("Model Info:\n");
-
-    printf("Generator: %s\n", model->asset.generator);
+    total_t = (double)(end_t - start_t) / CLOCKS_PER_SEC; 
+    printf("Loading GLB Model (%u iterations) info took on average %f microseconds per iteration\n", NOFITERATIONS, (total_t / (double)NOFITERATIONS) * 1000000);
     
+    GLTFModel model;
+    char c = gltf_modelLoad("resources/models/box/box.glb", &model);
 
-    releaseModelInfo(model); // DO NOT REMOVE
+    if(model.asset.generatorLength > 0) printf("Model Generator: %s\n", model.asset.generator);
+    if(model.asset.copyrightLength > 0) printf("Model Copyright: %s\n", model.asset.copyright);
+
+    free(model.data);
 
     // t = clock();
     // GLTFModelInfo buffer_data;   

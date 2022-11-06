@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.10)
 
-project(CGLTFModelLoader VERSION 0.1)
+project(cgltf VERSION 0.1)
 
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED True)
@@ -20,11 +20,32 @@ include_directories(${PROJECT_SOURCE_DIR}/deps/glfw/include)
 
 link_directories(${PROJECT_SOURCE_DIR}/build/deps/glfw/src)
 
-add_executable(CGLTFModelLoader src/main.c src/modules/3D/camera/camera.c src/modules/3D/shader/shader.c src/modules/3D/model/gltfLoader.c src/modules/glad/glad.c)
+add_executable( cgltf 
+                src/main.c 
+                src/modules/3D/camera/camera.c 
+                src/modules/3D/shader/shader.c 
+                src/modules/3D/model/gltf/accessor.c 
+                src/modules/3D/model/gltf/animation.c
+                src/modules/3D/model/gltf/asset.c
+                src/modules/3D/model/gltf/buffer.c
+                src/modules/3D/model/gltf/bufferView.c
+                src/modules/3D/model/gltf/camera.c
+                src/modules/3D/model/gltf/errors.c
+                src/modules/3D/model/gltf/gltf.c
+                src/modules/3D/model/gltf/header.c
+                src/modules/3D/model/gltf/image.c
+                src/modules/3D/model/gltf/material.c
+                src/modules/3D/model/gltf/mesh.c
+                src/modules/3D/model/gltf/node.c
+                src/modules/3D/model/gltf/sampler.c
+                src/modules/3D/model/gltf/scene.c
+                src/modules/3D/model/gltf/skin.c
+                src/modules/3D/model/gltf/texture.c
+                src/modules/glad/glad.c)
 
 
 if(WIN32)
-    target_link_libraries(CGLTFModelLoader PRIVATE glfw m)
+    target_link_libraries(cgltf PRIVATE glfw m pthread)
 else()
-    target_link_libraries(CGLTFModelLoader PRIVATE glfw m X11)
+    target_link_libraries(cgltf PRIVATE glfw m X11 pthread)
 endif()    

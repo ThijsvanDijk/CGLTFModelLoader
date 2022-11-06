@@ -3,4 +3,4 @@ NOFPROC=`expr $(nproc) - 1`
 mkdir build
 cmake -B build/ -S ./
 cmake --build build/ --config Release -j$NOFPROC
-./build/CGLTFModelLoader
+./build/cgltf
