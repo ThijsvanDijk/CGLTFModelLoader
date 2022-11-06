@@ -1,11 +1,15 @@
 # CGLTFModelLoader
 This is a GLTF Model Loader written in C, which is focused on reducing mesh loading times.
-Currently only supported on Linux, I'm working on easy cross-platform building for Windows (now done!).
+This is achieved by storing all GLTF Scene related data in one contiguous block of memory.
 
 ## Features
-- Supports both GLTF/GLB formats
-- Supports a custom GLB buffer format designed to be read directly from storage into OpenGL
-- Reads both position and normal data for now, working on including texture coordinates now
+- Supports GLB format only for now
+- Cross-platform with easy build scripts
+
+## Currently working on:
+- Expansion
+There are a lot of properties in the GLTF Specification and currently only some are supported.
+I'm working on a system that can be easily scaled so the work it takes to implement a new property is minimal.
 
 ## Dependencies
 - CGLM for quick maths
