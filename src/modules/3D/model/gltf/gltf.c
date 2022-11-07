@@ -11,20 +11,20 @@
     assigned spaces in this allocated buffer.
 */
 
-static __always_inline u64 gltf_getModelBufferSize(zj_Value* parsed_json){
+static __always_inline u64 gltf_getModelBufferSize(zj_Value* parsed_json, GLTFModel* model){
     u64 bufferSizeAccumulator = 0;
     // zj_Value* accessors = zj_ObjGet(parsed_json, "accessors");
     // zj_Value* animations = zj_ObjGet(parsed_json, "animations");
     zj_Value* asset = zj_ObjGet(parsed_json, "asset");
-    // zj_Value* buffers = zj_ObjGet(parsed_json, "buffers");
-    // zj_Value* bufferViews = zj_ObjGet(parsed_json, "bufferViews");
+    zj_Value* buffers = zj_ObjGet(parsed_json, "buffers");
+    zj_Value* bufferViews = zj_ObjGet(parsed_json, "bufferViews");
     // zj_Value* cameras = zj_ObjGet(parsed_json, "cameras");
     // zj_Value* images = zj_ObjGet(parsed_json, "images");
     // zj_Value* materials = zj_ObjGet(parsed_json, "materials");
     // zj_Value* meshes = zj_ObjGet(parsed_json, "meshes");
     // zj_Value* nodes = zj_ObjGet(parsed_json, "nodes");
     // zj_Value* samplers = zj_ObjGet(parsed_json, "samplers");
-    // zj_Value* scenes = zj_ObjGet(parsed_json, "scenes");
+    zj_Value* scenes = zj_ObjGet(parsed_json, "scenes");
     // zj_Value* skins = zj_ObjGet(parsed_json, "skins");
     // zj_Value* textures = zj_ObjGet(parsed_json, "textures");
 
@@ -32,15 +32,15 @@ static __always_inline u64 gltf_getModelBufferSize(zj_Value* parsed_json){
     // if(accessors != NULL) bufferSizeAccumulator += gltf_getAccessorsSize(accessors);
     // if(animations != NULL) bufferSizeAccumulator += gltf_getAnimationsSize(animations);
     bufferSizeAccumulator += gltf_getAssetSize(asset);
-    // if(buffers != NULL) bufferSizeAccumulator += gltf_getBuffersSize(buffers);
-    // if(bufferViews != NULL) bufferSizeAccumulator += gltf_getBufferViewsSize(bufferViews);
+    if(buffers != NULL) bufferSizeAccumulator += gltf_getBuffersSize(buffers, model);
+    if(bufferViews != NULL) bufferSizeAccumulator += gltf_getBufferViewsSize(bufferViews, model);
     // if(cameras != NULL) bufferSizeAccumulator += gltf_getCamerasSize(cameras);
     // if(images != NULL) bufferSizeAccumulator += gltf_getImagesSize(images);
     // if(materials != NULL) bufferSizeAccumulator += gltf_getMaterialsSize(materials);
     // if(meshes != NULL) bufferSizeAccumulator += gltf_getMeshesSize(meshes);
     // if(nodes != NULL) bufferSizeAccumulator += gltf_getNodesSize(nodes);
     // if(samplers != NULL) bufferSizeAccumulator += gltf_getSamplersSize(samplers);
-    // if(scenes != NULL) bufferSizeAccumulator += gltf_getScenesSize(scenes);
+    if(scenes != NULL) bufferSizeAccumulator += gltf_getScenesSize(scenes, model);
     // if(skins != NULL) bufferSizeAccumulator += gltf_getSkinsSize(skins);
     // if(textures != NULL) bufferSizeAccumulator += gltf_getTexturesSize(textures);
     
@@ -52,20 +52,23 @@ static __always_inline i8 gltf_fillModelData(zj_Value* parsed_json, GLTFModel* m
     // zj_Value* accessors = zj_ObjGet(parsed_json, "accessors");
     // zj_Value* animations = zj_ObjGet(parsed_json, "animations");
     zj_Value* asset = zj_ObjGet(parsed_json, "asset");
-    // zj_Value* buffers = zj_ObjGet(parsed_json, "buffers");
-    // zj_Value* bufferViews = zj_ObjGet(parsed_json, "bufferViews");
+    zj_Value* buffers = zj_ObjGet(parsed_json, "buffers");
+    zj_Value* bufferViews = zj_ObjGet(parsed_json, "bufferViews");
     // zj_Value* cameras = zj_ObjGet(parsed_json, "cameras");
     // zj_Value* images = zj_ObjGet(parsed_json, "images");
     // zj_Value* materials = zj_ObjGet(parsed_json, "materials");
     // zj_Value* meshes = zj_ObjGet(parsed_json, "meshes");
     // zj_Value* nodes = zj_ObjGet(parsed_json, "nodes");
     // zj_Value* samplers = zj_ObjGet(parsed_json, "samplers");
-    // zj_Value* scenes = zj_ObjGet(parsed_json, "scenes");
+    zj_Value* scenes = zj_ObjGet(parsed_json, "scenes");
     // zj_Value* skins = zj_ObjGet(parsed_json, "skins");
     // zj_Value* textures = zj_ObjGet(parsed_json, "textures");
 
-    gltf_fillAssetBuffer(asset, model, bufferPointer);
-    
+    bufferPointer = gltf_fillAssetBuffer(asset, model, bufferPointer);
+    if(buffers != 0) bufferPointer = gltf_fillBuffersBuffer(buffers, model, bufferPointer);
+    if(bufferViews != 0) bufferPointer = gltf_fillBufferViewsBuffer(bufferViews, model, bufferPointer); 
+    if(scenes != 0) bufferPointer = gltf_fillScenesBuffer(scenes, model, bufferPointer); 
+      
 }
 
 i8 gltf_modelLoad(const char* filename, GLTFModel* model){
@@ -114,8 +117,9 @@ i8 gltf_modelLoad(const char* filename, GLTFModel* model){
     if(zj_ParseLen(parsed_json, (const char *)&fileBuffer_u32ptr[5], fileBuffer_u32ptr[3]) != true) return gltf_error(2);
 
     // Get Buffer Size
-    u64 bufferSize = gltf_getModelBufferSize(parsed_json);
+    u64 bufferSize = gltf_getModelBufferSize(parsed_json, model);
     model->data = malloc(bufferSize);
+    model->dataLength = bufferSize;
 
     // Fill buffer
     gltf_fillModelData(parsed_json, model);

@@ -4,14 +4,14 @@ project(cgltf VERSION 0.1)
 
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED True)
-set(CMAKE_C_FLAGS -O3)
+set(CMAKE_C_FLAGS -g)
 
 set(BUILD_SHARED_LIBS False)
 set(GLFW_BUILD_TESTS False)
 set(GLFW_BUILD_EXAMPLES False)
 set(GLFW_BUILD_DOCS False)
 
-add_compile_options(-O3)
+add_compile_options(-g)
 
 add_subdirectory(${PROJECT_SOURCE_DIR}/deps/glfw)
 
@@ -45,7 +45,7 @@ add_executable( cgltf
 
 
 if(WIN32)
-    target_link_libraries(cgltf PRIVATE glfw m pthread)
+    target_link_libraries(cgltf PRIVATE glfw m)
 else()
-    target_link_libraries(cgltf PRIVATE glfw m X11 pthread)
+    target_link_libraries(cgltf PRIVATE glfw m X11)
 endif()    

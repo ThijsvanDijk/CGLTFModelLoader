@@ -5,6 +5,6 @@
 
 u64 gltf_getAssetSize(zj_Value* asset);
 
-i8 gltf_fillAssetBuffer(zj_Value* accessors_json, GLTFModel* model, byte* bufferPointer);
+byte* gltf_fillAssetBuffer(zj_Value* accessors_json, GLTFModel* model, byte* bufferPointer);
 
 #endif

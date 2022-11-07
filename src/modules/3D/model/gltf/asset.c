@@ -14,7 +14,7 @@ u64 gltf_getAssetSize(zj_Value* asset){
     return bufferLengthAccumulator;
 }
 
-i8 gltf_fillAssetBuffer(zj_Value* asset, GLTFModel* result, byte* bufferPointer){
+byte* gltf_fillAssetBuffer(zj_Value* asset, GLTFModel* result, byte* bufferPointer){
     // version
     const char* asset_version = zj_GetStr(zj_ObjGet(asset, "version"));
     sscanf(asset_version, "%hhu.%hhu", &result->asset.versionMajor, &result->asset.versionMinor);
@@ -51,5 +51,5 @@ i8 gltf_fillAssetBuffer(zj_Value* asset, GLTFModel* result, byte* bufferPointer)
         bufferPointer += copyrightLength;
     }
 
-    return 0;
+    return bufferPointer;
 }

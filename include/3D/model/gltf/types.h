@@ -195,6 +195,8 @@ typedef struct{
     // Optionals
     const string name;
     const string uri;
+    u16 nameLength;
+    u16 uriLength;
 } GLTFBuffer;
 
 //---------- BufferViews ----------//
@@ -205,9 +207,11 @@ typedef struct{
     u64 byteLength;
     // Optional
     u64 byteOffset; // Default : 0
-    u8 byteStride;
+    u8 byteStride; // Default : 0
     GLTFBufferViewTarget target;
     const string name;
+    bool hasTarget;
+    u16 nameLength;
 } GLTFBufferView;
 
 //---------- Cameras ----------//
@@ -419,6 +423,7 @@ typedef struct{
     u32 scenesCount;
     u32 skinsCount;
     u32 texturesCount;
+    u64 dataLength;
     byte* data;
 } GLTFModel;
 

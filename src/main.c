@@ -17,7 +17,7 @@
 #define WIDTH 1920
 #define HEIGHT 1080
 
-#define NOFITERATIONS 1
+#define NOFITERATIONS 100000
 
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
@@ -63,6 +63,8 @@ void process_input(GLFWwindow* window){
     if(glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
         engine_camera_process_keyboard(main_cam, RIGHT, deltaTime);
 }
+
+void print_model(GLTFModel* model);
 
 int main(void) {
     clock_t start_t, end_t;
@@ -111,8 +113,9 @@ int main(void) {
     GLTFModel model;
     char c = gltf_modelLoad("resources/models/box/box.glb", &model);
 
-    if(model.asset.generatorLength > 0) printf("Model Generator: %s\n", model.asset.generator);
-    if(model.asset.copyrightLength > 0) printf("Model Copyright: %s\n", model.asset.copyright);
+    print_model(&model);
+    
+
 
     free(model.data);
 
@@ -203,4 +206,56 @@ int main(void) {
     // glfwTerminate();
 
     return 0;
+}
+
+void print_model(GLTFModel* model){
+    printf("========================================\nGLTF Model Info\nTotal Size in memory: %lu bytes\n", sizeof(GLTFModel) + model->dataLength);
+
+    // Asset
+    printf("----------------------------------------\n");
+                                            printf("Asset:\n\tVersion:     %hhu.%hhu\n", model->asset.versionMajor, model->asset.versionMinor);
+    if(model->asset.hasMinVersion)          printf("\tMin Version: %hhu.%hhu\n", model->asset.minVersionMajor, model->asset.minVersionMinor);
+    if(model->asset.copyrightLength > 0)    printf("\tCopyright:   %s\n", model->asset.copyright);
+    if(model->asset.generatorLength > 0)    printf("\tGenerator:   %s\n", model->asset.generator);
+
+    // Buffers
+    printf("----------------------------------------\n");
+
+    for(u32 i = 0; i < model->buffersCount; i++){
+        printf("Buffer %u:\n", i + 1);
+        printf("\tByteLength: %lu\n", model->buffers[i].byteLength);
+        if(model->buffers[i].nameLength > 0) printf("\tName:       %s", model->buffers[i].name);
+        if(model->buffers[i].uriLength > 0) printf("\tUri:        %s", model->buffers[i].uri);        
+    }
+
+    // Scenes
+    printf("----------------------------------------\n");
+
+    for(u32 i = 0; i < model->scenesCount; i++){
+        printf("Scene %u:\n", i + 1);
+        if(model->scenes[i].nodesLength > 0){
+            printf("\tNodes: [");
+            for(u32 j = 0; j < model->scenes[i].nodesLength; j++){
+                printf("%u", model->scenes[i].nodes[j]);
+                if(j != model->scenes[i].nodesLength - 1) printf(", ");
+            }
+            printf("]\n");
+        }
+        if(model->scenes[i].nameLength > 0) printf("\tName:  %s\n", model->scenes[i].name);        
+    }
+
+    // Buffer Views
+    printf("----------------------------------------\n");
+    for(u32 i = 0; i < model->bufferViewsCount; i++){
+        printf("Buffer View %u:\n", i + 1);
+        printf("\tBuffer:      %u\n", model->bufferViews[i].buffer);
+        printf("\tByte Offset: %lu\n", model->bufferViews[i].byteOffset);
+        printf("\tByte Length: %lu\n", model->bufferViews[i].byteLength);
+        printf("\tByte Stride: %hhu\n", model->bufferViews[i].byteStride);
+        if(model->bufferViews[i].hasTarget) printf("\tTarget:      %u\n", model->bufferViews[i].target);
+        if(model->bufferViews[i].nameLength > 0) printf("\tName:        %s\n", model->bufferViews[i].name);
+
+    }
+
+    printf("========================================\n");
 }
