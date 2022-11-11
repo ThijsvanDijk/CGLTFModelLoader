@@ -17,7 +17,7 @@
 #define WIDTH 1920
 #define HEIGHT 1080
 
-#define NOFITERATIONS 100000
+#define NOFITERATIONS 1000
 
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
@@ -111,7 +111,7 @@ int main(void) {
     printf("Loading GLB Model (%u iterations) info took on average %f microseconds per iteration\n", NOFITERATIONS, (total_t / (double)NOFITERATIONS) * 1000000);
     
     GLTFModel model;
-    char c = gltf_modelLoad("resources/models/box/box.glb", &model);
+    char c = gltf_modelLoad("resources/models/washington/washington.glb", &model);
 
     print_model(&model);
     
@@ -222,17 +222,17 @@ void print_model(GLTFModel* model){
     printf("----------------------------------------\n");
 
     for(u32 i = 0; i < model->buffersCount; i++){
-        printf("Buffer %u:\n", i + 1);
+        printf("Buffer %u:\n", i);
         printf("\tByteLength: %lu\n", model->buffers[i].byteLength);
         if(model->buffers[i].nameLength > 0) printf("\tName:       %s", model->buffers[i].name);
-        if(model->buffers[i].uriLength > 0) printf("\tUri:        %s", model->buffers[i].uri);        
+        if(model->buffers[i].uriLength > 0) printf("\tUri:        %s", model->buffers[i].uri);       
     }
 
     // Scenes
     printf("----------------------------------------\n");
 
     for(u32 i = 0; i < model->scenesCount; i++){
-        printf("Scene %u:\n", i + 1);
+        printf("Scene %u:\n", i);
         if(model->scenes[i].nodesLength > 0){
             printf("\tNodes: [");
             for(u32 j = 0; j < model->scenes[i].nodesLength; j++){
@@ -247,14 +247,63 @@ void print_model(GLTFModel* model){
     // Buffer Views
     printf("----------------------------------------\n");
     for(u32 i = 0; i < model->bufferViewsCount; i++){
-        printf("Buffer View %u:\n", i + 1);
+        printf("Buffer View %u:\n", i);
         printf("\tBuffer:      %u\n", model->bufferViews[i].buffer);
         printf("\tByte Offset: %lu\n", model->bufferViews[i].byteOffset);
         printf("\tByte Length: %lu\n", model->bufferViews[i].byteLength);
         printf("\tByte Stride: %hhu\n", model->bufferViews[i].byteStride);
         if(model->bufferViews[i].hasTarget) printf("\tTarget:      %u\n", model->bufferViews[i].target);
         if(model->bufferViews[i].nameLength > 0) printf("\tName:        %s\n", model->bufferViews[i].name);
+    }
 
+    // Nodes
+    printf("----------------------------------------\n");
+    for(u32 i = 0; i < model->nodesCount; i++){
+        printf("Node %u:\n", i);
+        
+        // Children
+        printf("\tChildren(%u): [", model->nodes[i].childrenLength);
+        for(u32 j = 0; j < model->nodes[i].childrenLength; j++){
+            printf("%u", model->nodes[i].children[j]);
+            if(j != model->nodes[i].childrenLength - 1) printf(", ");
+        }
+        printf("]\n");
+
+        // Name
+        if(model->nodes[i].nameLength > 0) 
+            printf("\tName:   %s\n", model->nodes[i].name);
+        
+        // Mesh
+        if(model->nodes[i].hasMesh) 
+            printf("\tMesh:   %u\n", model->nodes[i].mesh);
+
+        // Camera
+        if(model->nodes[i].hasCamera) 
+            printf("\tCamera: %u\n", model->nodes[i].camera);
+        
+        // Translation
+        printf("\tTranslation: [%.2f, %.2f, %.2f]\n", model->nodes[i].translation[0], model->nodes[i].translation[1], model->nodes[i].translation[2]);
+        
+        // Rotation
+        printf("\tRotation: [%.2f, %.2f, %.2f, %.2f]\n", model->nodes[i].rotation[0], model->nodes[i].rotation[1], model->nodes[i].rotation[2], model->nodes[i].rotation[3]);
+        
+        // Scale
+        printf("\tScale: [%.2f, %.2f, %.2f]\n", model->nodes[i].scale[0], model->nodes[i].scale[1], model->nodes[i].scale[2]);
+
+        // Matrix
+        vec4* matrix = model->nodes[i].matrix;
+        printf("\tMatrix:   | %0.2f %0.2f %0.2f %0.2f |\n", matrix[0][0], matrix[1][0], matrix[2][0], matrix[3][0]);
+        printf("\t          | %0.2f %0.2f %0.2f %0.2f |\n", matrix[0][1], matrix[1][1], matrix[2][1], matrix[3][1]);
+        printf("\t          | %0.2f %0.2f %0.2f %0.2f |\n", matrix[0][2], matrix[1][2], matrix[2][2], matrix[3][2]);
+        printf("\t          | %0.2f %0.2f %0.2f %0.2f |\n", matrix[0][3], matrix[1][3], matrix[2][3], matrix[3][3]);
+
+        // Weights
+        printf("\tWeights(%u): [", model->nodes[i].weightsLength);
+        for(u32 j = 0; j < model->nodes[i].weightsLength; j++){
+            printf("%.2f", model->nodes[i].weights[j]);
+            if(j != model->nodes[i].weightsLength - 1) printf(", ");
+        }
+        printf("]\n");
     }
 
     printf("========================================\n");

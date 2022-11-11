@@ -22,7 +22,7 @@ static __always_inline u64 gltf_getModelBufferSize(zj_Value* parsed_json, GLTFMo
     // zj_Value* images = zj_ObjGet(parsed_json, "images");
     // zj_Value* materials = zj_ObjGet(parsed_json, "materials");
     // zj_Value* meshes = zj_ObjGet(parsed_json, "meshes");
-    // zj_Value* nodes = zj_ObjGet(parsed_json, "nodes");
+    zj_Value* nodes = zj_ObjGet(parsed_json, "nodes");
     // zj_Value* samplers = zj_ObjGet(parsed_json, "samplers");
     zj_Value* scenes = zj_ObjGet(parsed_json, "scenes");
     // zj_Value* skins = zj_ObjGet(parsed_json, "skins");
@@ -38,7 +38,7 @@ static __always_inline u64 gltf_getModelBufferSize(zj_Value* parsed_json, GLTFMo
     // if(images != NULL) bufferSizeAccumulator += gltf_getImagesSize(images);
     // if(materials != NULL) bufferSizeAccumulator += gltf_getMaterialsSize(materials);
     // if(meshes != NULL) bufferSizeAccumulator += gltf_getMeshesSize(meshes);
-    // if(nodes != NULL) bufferSizeAccumulator += gltf_getNodesSize(nodes);
+    if(nodes != NULL) bufferSizeAccumulator += gltf_getNodesSize(nodes, model);
     // if(samplers != NULL) bufferSizeAccumulator += gltf_getSamplersSize(samplers);
     if(scenes != NULL) bufferSizeAccumulator += gltf_getScenesSize(scenes, model);
     // if(skins != NULL) bufferSizeAccumulator += gltf_getSkinsSize(skins);
@@ -58,7 +58,7 @@ static __always_inline i8 gltf_fillModelData(zj_Value* parsed_json, GLTFModel* m
     // zj_Value* images = zj_ObjGet(parsed_json, "images");
     // zj_Value* materials = zj_ObjGet(parsed_json, "materials");
     // zj_Value* meshes = zj_ObjGet(parsed_json, "meshes");
-    // zj_Value* nodes = zj_ObjGet(parsed_json, "nodes");
+    zj_Value* nodes = zj_ObjGet(parsed_json, "nodes");
     // zj_Value* samplers = zj_ObjGet(parsed_json, "samplers");
     zj_Value* scenes = zj_ObjGet(parsed_json, "scenes");
     // zj_Value* skins = zj_ObjGet(parsed_json, "skins");
@@ -68,6 +68,7 @@ static __always_inline i8 gltf_fillModelData(zj_Value* parsed_json, GLTFModel* m
     if(buffers != 0) bufferPointer = gltf_fillBuffersBuffer(buffers, model, bufferPointer);
     if(bufferViews != 0) bufferPointer = gltf_fillBufferViewsBuffer(bufferViews, model, bufferPointer); 
     if(scenes != 0) bufferPointer = gltf_fillScenesBuffer(scenes, model, bufferPointer); 
+    if(nodes != 0) bufferPointer = gltf_fillNodesBuffer(nodes, model, bufferPointer);
       
 }
 

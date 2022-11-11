@@ -22,7 +22,7 @@ u64 gltf_getBuffersSize(zj_Value* buffers_json, GLTFModel* model){
 }
 
 byte* gltf_fillBuffersBuffer(zj_Value* buffers_json, GLTFModel* model, byte* bufferPointer){
-    model->buffers = bufferPointer;                             // Start of Buffer area in data block
+    model->buffers = (GLTFBuffer*)bufferPointer;                // Start of Buffer area in data block
     bufferPointer += sizeof(GLTFBuffer) * model->buffersCount;  // Leave space for the structs
 
     zj_Value* currentBuffer;

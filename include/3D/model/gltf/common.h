@@ -1,7 +1,7 @@
 #ifndef GLTF_COMMON_H
 #define GLTF_COMMON_H
 
-#include <cglm/types.h>
+#include <cglm/cglm.h>
 #include <zzzjson/zzzjson.h>
 #include <stdbool.h>
 #include <pthread.h>

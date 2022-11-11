@@ -14,37 +14,6 @@
 //     return 0;
 // }
 
-
-//     //---------- Nodes ----------//
-//     zj_Value* nodes = zj_ObjGet(parsed_json, "nodes");
-
-//     // Go through array
-//     result->nodesLength = 0;
-//     zj_Value* currentNode;
-//     while(currentNode = zj_ArrayGet(nodes, result->nodesLength)){
-//         result->nodesLength++;
-
-//         // Count the children
-//         zj_Value* children = zj_ObjGet(currentNode, "children");
-//         if(children){
-//             uint32_t child_counter = 0;
-//             zj_Value* currentChild;
-//             while(currentChild = zj_ArrayGet(children, child_counter)){
-//                 child_counter++;
-//                 bufferLengthAccumulator += sizeof(uint32_t);
-//             }
-//         }
-//         // Get length of name string
-//         zj_Value* node_name = zj_ObjGet(currentNode, "name");
-//         if(node_name){
-//             const char * name_str = zj_GetStr(node_name);
-//             bufferLengthAccumulator += strlen(name_str) + 1;
-//         }
-
-//         bufferLengthAccumulator += sizeof(GLTFNode);
-        
-//     }
-
 //     //========== END READING MODEL ==========//
 
 //     //---------- Nodes ----------//

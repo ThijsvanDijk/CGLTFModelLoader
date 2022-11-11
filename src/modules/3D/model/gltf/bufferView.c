@@ -19,7 +19,7 @@ u64 gltf_getBufferViewsSize(zj_Value* bufferViews_json, GLTFModel* model){
 }
 
 byte* gltf_fillBufferViewsBuffer(zj_Value* bufferViews_json, GLTFModel* model, byte* bufferPointer){
-    model->bufferViews = bufferPointer;                                 // Start of Buffer View area in data block
+    model->bufferViews = (GLTFBufferView*)bufferPointer;                // Start of Buffer View area in data block
     bufferPointer += sizeof(GLTFBufferView) * model->bufferViewsCount;  // Leave space for the structs
 
     zj_Value* currentBufferView;

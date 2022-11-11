@@ -3,8 +3,8 @@
 
 #include <3D/model/gltf/types.h>
 
-u64 gltf_getNodesSize(zj_Value* accessors_json);
+u64 gltf_getNodesSize(zj_Value* nodes, GLTFModel* model);
 
-i8 gltf_fillNodesBuffer(zj_Value* accessors_json, void* bufferPointer);
+byte* gltf_fillNodesBuffer(zj_Value* nodes, GLTFModel* model, byte* bufferPointer);
 
 #endif

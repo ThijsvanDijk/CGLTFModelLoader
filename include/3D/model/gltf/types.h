@@ -341,8 +341,11 @@ typedef struct{
     float* weights;
     const char* name; 
     u32 childrenLength;
+    u32 weightsLength;
     u32 nameLength;  
     bool hasMesh : 1;
+    bool hasCamera : 1;
+    bool hasSkin : 1;
     bool hasMatrix : 1;
     bool hasRotation : 1;
     bool hasScale : 1;
