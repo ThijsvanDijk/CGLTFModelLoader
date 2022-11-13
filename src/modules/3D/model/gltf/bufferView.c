@@ -37,9 +37,12 @@ byte* gltf_fillBufferViewsBuffer(zj_Value* bufferViews_json, GLTFModel* model, b
         zj_Value* byteStride = zj_ObjGet(currentBufferView, "byteStride");
         if(byteStride != 0) model->bufferViews[i].byteStride = *zj_GetInt(byteStride);
 
-        model->bufferViews[i].hasTarget = 0;
+        model->bufferViews[i].hasTarget = false;
         zj_Value* target = zj_ObjGet(currentBufferView, "target");
-        if(target != 0) model->bufferViews[i].target = *zj_GetInt(target); model->bufferViews->hasTarget = 1;
+        if(target){
+            model->bufferViews[i].target = *zj_GetInt(target);
+            model->bufferViews[i].hasTarget = true;
+        }  
 
         model->bufferViews[i].nameLength = 0;
         zj_Value* name = zj_ObjGet(currentBufferView, "name");

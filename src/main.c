@@ -17,7 +17,7 @@
 #define WIDTH 1920
 #define HEIGHT 1080
 
-#define NOFITERATIONS 1000
+#define NOFITERATIONS 1
 
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
@@ -111,11 +111,9 @@ int main(void) {
     printf("Loading GLB Model (%u iterations) info took on average %f microseconds per iteration\n", NOFITERATIONS, (total_t / (double)NOFITERATIONS) * 1000000);
     
     GLTFModel model;
-    char c = gltf_modelLoad("resources/models/washington/washington.glb", &model);
+    char c = gltf_modelLoad("resources/models/sword/sword.glb", &model);
 
     print_model(&model);
-    
-
 
     free(model.data);
 
@@ -218,6 +216,30 @@ void print_model(GLTFModel* model){
     if(model->asset.copyrightLength > 0)    printf("\tCopyright:   %s\n", model->asset.copyright);
     if(model->asset.generatorLength > 0)    printf("\tGenerator:   %s\n", model->asset.generator);
 
+    // Accessors
+    printf("----------------------------------------\n");
+    for(u32 i = 0; i < model->accessorsCount; i++){
+        printf("Accessor %u:\n", i);
+        printf("\tComponentType: %u\n", model->accessors[i].componentType);
+        printf("\tCount:         %u\n", model->accessors[i].count);
+        printf("\tType:          %u\n", model->accessors[i].type);
+        if(model->accessors[i].hasBufferView) printf("\tBufferView:    %u\n", model->accessors[i].bufferView);
+        printf("\tByteOffset:    %lu\n", model->accessors[i].byteOffset);
+        printf("\tNormalized:    %hhu\n", model->accessors[i].normalized);
+        if(model->accessors[i].nameLength > 0) printf("\tName:          %s\n", model->accessors[i].name);
+        if(model->accessors[i].hasSparse){
+            printf("\tSparse:\n");
+            printf("\t\tCount: %lu\n", model->accessors[i].sparse.count);
+            printf("\t\tIndices:\n");
+            printf("\t\t\tBufferView: %u\n", model->accessors[i].sparse.indices.bufferView);
+            printf("\t\t\tByteOffset: %lu\n", model->accessors[i].sparse.indices.byteOffset);
+            printf("\t\t\tComponentType: %u\n", model->accessors[i].sparse.indices.componentType);
+            printf("\t\tValues:\n");
+            printf("\t\t\tBufferView: %u\n", model->accessors[i].sparse.values.bufferView);
+            printf("\t\t\tByteOffset: %lu\n", model->accessors[i].sparse.values.byteOffset);
+        }
+    }
+
     // Buffers
     printf("----------------------------------------\n");
 
@@ -226,22 +248,6 @@ void print_model(GLTFModel* model){
         printf("\tByteLength: %lu\n", model->buffers[i].byteLength);
         if(model->buffers[i].nameLength > 0) printf("\tName:       %s", model->buffers[i].name);
         if(model->buffers[i].uriLength > 0) printf("\tUri:        %s", model->buffers[i].uri);       
-    }
-
-    // Scenes
-    printf("----------------------------------------\n");
-
-    for(u32 i = 0; i < model->scenesCount; i++){
-        printf("Scene %u:\n", i);
-        if(model->scenes[i].nodesLength > 0){
-            printf("\tNodes: [");
-            for(u32 j = 0; j < model->scenes[i].nodesLength; j++){
-                printf("%u", model->scenes[i].nodes[j]);
-                if(j != model->scenes[i].nodesLength - 1) printf(", ");
-            }
-            printf("]\n");
-        }
-        if(model->scenes[i].nameLength > 0) printf("\tName:  %s\n", model->scenes[i].name);        
     }
 
     // Buffer Views
@@ -304,6 +310,22 @@ void print_model(GLTFModel* model){
             if(j != model->nodes[i].weightsLength - 1) printf(", ");
         }
         printf("]\n");
+    }
+
+    // Scenes
+    printf("----------------------------------------\n");
+
+    for(u32 i = 0; i < model->scenesCount; i++){
+        printf("Scene %u:\n", i);
+        if(model->scenes[i].nodesLength > 0){
+            printf("\tNodes: [");
+            for(u32 j = 0; j < model->scenes[i].nodesLength; j++){
+                printf("%u", model->scenes[i].nodes[j]);
+                if(j != model->scenes[i].nodesLength - 1) printf(", ");
+            }
+            printf("]\n");
+        }
+        if(model->scenes[i].nameLength > 0) printf("\tName:  %s\n", model->scenes[i].name);        
     }
 
     printf("========================================\n");

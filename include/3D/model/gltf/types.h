@@ -133,10 +133,11 @@ typedef struct{
     u32 bufferView;
     u64 byteOffset; // Default: 0
     bool normalized; // Default: false
-    float* max;
-    float* min;
     GLTFAccessorSparse sparse;
     const string name;
+    u32 nameLength;
+    bool hasBufferView : 1;
+    bool hasSparse : 1;
 } GLTFAccessor;
 
 //---------- Animations ----------//

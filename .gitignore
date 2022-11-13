@@ -55,5 +55,5 @@ dkms.conf
 build/
 lib/
 .vscode/
-resources/models/washington
+resources/models
 deps/*/build

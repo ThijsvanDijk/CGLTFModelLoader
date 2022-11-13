@@ -13,7 +13,7 @@
 
 static __always_inline u64 gltf_getModelBufferSize(zj_Value* parsed_json, GLTFModel* model){
     u64 bufferSizeAccumulator = 0;
-    // zj_Value* accessors = zj_ObjGet(parsed_json, "accessors");
+    zj_Value* accessors = zj_ObjGet(parsed_json, "accessors");
     // zj_Value* animations = zj_ObjGet(parsed_json, "animations");
     zj_Value* asset = zj_ObjGet(parsed_json, "asset");
     zj_Value* buffers = zj_ObjGet(parsed_json, "buffers");
@@ -29,7 +29,7 @@ static __always_inline u64 gltf_getModelBufferSize(zj_Value* parsed_json, GLTFMo
     // zj_Value* textures = zj_ObjGet(parsed_json, "textures");
 
 
-    // if(accessors != NULL) bufferSizeAccumulator += gltf_getAccessorsSize(accessors);
+    if(accessors != NULL) bufferSizeAccumulator += gltf_getAccessorsSize(accessors, model);
     // if(animations != NULL) bufferSizeAccumulator += gltf_getAnimationsSize(animations);
     bufferSizeAccumulator += gltf_getAssetSize(asset);
     if(buffers != NULL) bufferSizeAccumulator += gltf_getBuffersSize(buffers, model);
@@ -49,7 +49,7 @@ static __always_inline u64 gltf_getModelBufferSize(zj_Value* parsed_json, GLTFMo
 
 static __always_inline i8 gltf_fillModelData(zj_Value* parsed_json, GLTFModel* model){
     byte* bufferPointer = model->data;
-    // zj_Value* accessors = zj_ObjGet(parsed_json, "accessors");
+    zj_Value* accessors = zj_ObjGet(parsed_json, "accessors");
     // zj_Value* animations = zj_ObjGet(parsed_json, "animations");
     zj_Value* asset = zj_ObjGet(parsed_json, "asset");
     zj_Value* buffers = zj_ObjGet(parsed_json, "buffers");
@@ -67,8 +67,10 @@ static __always_inline i8 gltf_fillModelData(zj_Value* parsed_json, GLTFModel* m
     bufferPointer = gltf_fillAssetBuffer(asset, model, bufferPointer);
     if(buffers != 0) bufferPointer = gltf_fillBuffersBuffer(buffers, model, bufferPointer);
     if(bufferViews != 0) bufferPointer = gltf_fillBufferViewsBuffer(bufferViews, model, bufferPointer); 
-    if(scenes != 0) bufferPointer = gltf_fillScenesBuffer(scenes, model, bufferPointer); 
     if(nodes != 0) bufferPointer = gltf_fillNodesBuffer(nodes, model, bufferPointer);
+    if(scenes != 0) bufferPointer = gltf_fillScenesBuffer(scenes, model, bufferPointer); 
+    if(accessors != 0) bufferPointer = gltf_fillAccessorsBuffer(accessors, model, bufferPointer);
+    
       
 }
 
