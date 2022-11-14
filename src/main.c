@@ -111,7 +111,7 @@ int main(void) {
     printf("Loading GLB Model (%u iterations) info took on average %f microseconds per iteration\n", NOFITERATIONS, (total_t / (double)NOFITERATIONS) * 1000000);
     
     GLTFModel model;
-    char c = gltf_modelLoad("resources/models/japan/japan.glb", &model);
+    char c = gltf_modelLoad("resources/models/box/box.glb", &model);
 
     print_model(&model);
 
