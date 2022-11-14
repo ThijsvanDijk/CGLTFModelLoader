@@ -1,9 +1,12 @@
 #include <3D/model/gltf/camera.h>
 
-u64 gltf_getCamerasSize(zj_Value* accessors_json){
-    return 0;
+u64 gltf_getCamerasSize(zj_Value* cameras, GLTFModel* model){
+    u64 bufferLengthAccumulator = 0;
+
+    return bufferLengthAccumulator;
 }
 
-i8 gltf_fillCamerasBuffer(zj_Value* accessors_json, void* bufferPointer){
-    return 0;
+byte* gltf_fillCamerasBuffer(zj_Value* cameras, GLTFModel* model, byte* bufferPointer){
+    
+    return bufferPointer;
 }

@@ -3,8 +3,8 @@
 
 #include <3D/model/gltf/types.h>
 
-u64 gltf_getCamerasSize(zj_Value* accessors_json);
+u64 gltf_getCamerasSize(zj_Value* cameras, GLTFModel* model);
 
-i8 gltf_fillCamerasBuffer(zj_Value* accessors_json, void* bufferPointer);
+byte* gltf_fillCamerasBuffer(zj_Value* cameras, GLTFModel* model, byte* bufferPointer);
 
 #endif

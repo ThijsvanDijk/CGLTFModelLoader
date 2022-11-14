@@ -111,7 +111,7 @@ int main(void) {
     printf("Loading GLB Model (%u iterations) info took on average %f microseconds per iteration\n", NOFITERATIONS, (total_t / (double)NOFITERATIONS) * 1000000);
     
     GLTFModel model;
-    char c = gltf_modelLoad("resources/models/box/box.glb", &model);
+    char c = gltf_modelLoad("resources/models/japan/japan.glb", &model);
 
     print_model(&model);
 
@@ -216,50 +216,20 @@ void print_model(GLTFModel* model){
     if(model->asset.copyrightLength > 0)    printf("\tCopyright:   %s\n", model->asset.copyright);
     if(model->asset.generatorLength > 0)    printf("\tGenerator:   %s\n", model->asset.generator);
 
-    // Accessors
+    // Scenes
     printf("----------------------------------------\n");
-    for(u32 i = 0; i < model->accessorsCount; i++){
-        printf("Accessor %u:\n", i);
-        printf("\tComponentType: %u\n", model->accessors[i].componentType);
-        printf("\tCount:         %u\n", model->accessors[i].count);
-        printf("\tType:          %u\n", model->accessors[i].type);
-        if(model->accessors[i].hasBufferView) printf("\tBufferView:    %u\n", model->accessors[i].bufferView);
-        printf("\tByteOffset:    %lu\n", model->accessors[i].byteOffset);
-        printf("\tNormalized:    %hhu\n", model->accessors[i].normalized);
-        if(model->accessors[i].nameLength > 0) printf("\tName:          %s\n", model->accessors[i].name);
-        if(model->accessors[i].hasSparse){
-            printf("\tSparse:\n");
-            printf("\t\tCount: %lu\n", model->accessors[i].sparse.count);
-            printf("\t\tIndices:\n");
-            printf("\t\t\tBufferView: %u\n", model->accessors[i].sparse.indices.bufferView);
-            printf("\t\t\tByteOffset: %lu\n", model->accessors[i].sparse.indices.byteOffset);
-            printf("\t\t\tComponentType: %u\n", model->accessors[i].sparse.indices.componentType);
-            printf("\t\tValues:\n");
-            printf("\t\t\tBufferView: %u\n", model->accessors[i].sparse.values.bufferView);
-            printf("\t\t\tByteOffset: %lu\n", model->accessors[i].sparse.values.byteOffset);
+
+    for(u32 i = 0; i < model->scenesCount; i++){
+        printf("Scene %u:\n", i);
+        if(model->scenes[i].nodesLength > 0){
+            printf("\tNodes: [");
+            for(u32 j = 0; j < model->scenes[i].nodesLength; j++){
+                printf("%u", model->scenes[i].nodes[j]);
+                if(j != model->scenes[i].nodesLength - 1) printf(", ");
+            }
+            printf("]\n");
         }
-    }
-
-    // Buffers
-    printf("----------------------------------------\n");
-
-    for(u32 i = 0; i < model->buffersCount; i++){
-        printf("Buffer %u:\n", i);
-        printf("\tByteLength: %lu\n", model->buffers[i].byteLength);
-        if(model->buffers[i].nameLength > 0) printf("\tName:       %s", model->buffers[i].name);
-        if(model->buffers[i].uriLength > 0) printf("\tUri:        %s", model->buffers[i].uri);       
-    }
-
-    // Buffer Views
-    printf("----------------------------------------\n");
-    for(u32 i = 0; i < model->bufferViewsCount; i++){
-        printf("Buffer View %u:\n", i);
-        printf("\tBuffer:      %u\n", model->bufferViews[i].buffer);
-        printf("\tByte Offset: %lu\n", model->bufferViews[i].byteOffset);
-        printf("\tByte Length: %lu\n", model->bufferViews[i].byteLength);
-        printf("\tByte Stride: %hhu\n", model->bufferViews[i].byteStride);
-        if(model->bufferViews[i].hasTarget) printf("\tTarget:      %u\n", model->bufferViews[i].target);
-        if(model->bufferViews[i].nameLength > 0) printf("\tName:        %s\n", model->bufferViews[i].name);
+        if(model->scenes[i].nameLength > 0) printf("\tName:  %s\n", model->scenes[i].name);        
     }
 
     // Nodes
@@ -312,20 +282,83 @@ void print_model(GLTFModel* model){
         printf("]\n");
     }
 
-    // Scenes
+    // Meshes
+    printf("----------------------------------------\n");
+    for(u32 i = 0; i < model->meshesCount; i++){
+        printf("Mesh %u:\n", i);
+        if(model->meshes[i].nameLength > 0) printf("\tName: %s\n", model->meshes[i].name);
+
+        // Weights
+        printf("\tWeights: [");
+        for(u32 j = 0; j < model->meshes[i].weightsLength; j++){
+            printf("%.2f", model->meshes[i].weights[j]);
+            if(j != model->meshes[i].weightsLength - 1) printf(", ");
+        }
+        printf("]\n");
+
+        // Primitives
+        printf("\tPrimitives:\n");
+        for(u32 j = 0; j < model->meshes[i].primitivesLength; j++){
+            if(model->meshes[i].primitives[j].hasIndices) printf("\t\tIndices: %u\n", model->meshes[i].primitives[j].indices);
+            if(model->meshes[i].primitives[j].hasMaterial) printf("\t\tMaterial: %u\n", model->meshes[i].primitives[j].material);
+            printf("\t\tMode: %u\n", model->meshes[i].primitives[j].mode);
+            printf("\t\tAttributes:\n");
+            if(model->meshes[i].primitives[j].attributes.hasPosition) printf("\t\t\tPOSITION: %u\n", model->meshes[i].primitives[j].attributes.position);
+            if(model->meshes[i].primitives[j].attributes.hasNormal) printf("\t\t\tNORMAL: %u\n", model->meshes[i].primitives[j].attributes.normal);
+            if(model->meshes[i].primitives[j].attributes.hasTangent) printf("\t\t\tTANGENT: %u\n", model->meshes[i].primitives[j].attributes.tangent);
+            if(model->meshes[i].primitives[j].attributes.hasTexcoord0) printf("\t\t\tTEXCOORD_0: %u\n", model->meshes[i].primitives[j].attributes.texcoord0);
+            if(model->meshes[i].primitives[j].attributes.hasTexcoord1) printf("\t\t\tTEXCOORD_1: %u\n", model->meshes[i].primitives[j].attributes.texcoord1);
+            if(model->meshes[i].primitives[j].attributes.hasColor) printf("\t\t\tCOLOR_0: %u\n", model->meshes[i].primitives[j].attributes.color);
+            if(model->meshes[i].primitives[j].attributes.hasJoints) printf("\t\t\tJOINTS_0: %u\n", model->meshes[i].primitives[j].attributes.joints);
+            if(model->meshes[i].primitives[j].attributes.hasWeights) printf("\t\t\tWEIGHTS_0: %u\n", model->meshes[i].primitives[j].attributes.weights);
+        }
+        printf("]\n");
+    }
+
+    // Accessors
+    printf("----------------------------------------\n");
+    for(u32 i = 0; i < model->accessorsCount; i++){
+        printf("Accessor %u:\n", i);
+        printf("\tComponentType: %u\n", model->accessors[i].componentType);
+        printf("\tCount:         %u\n", model->accessors[i].count);
+        printf("\tType:          %u\n", model->accessors[i].type);
+        if(model->accessors[i].hasBufferView) printf("\tBufferView:    %u\n", model->accessors[i].bufferView);
+        printf("\tByteOffset:    %lu\n", model->accessors[i].byteOffset);
+        printf("\tNormalized:    %hhu\n", model->accessors[i].normalized);
+        if(model->accessors[i].nameLength > 0) printf("\tName:          %s\n", model->accessors[i].name);
+        if(model->accessors[i].hasSparse){
+            printf("\tSparse:\n");
+            printf("\t\tCount: %lu\n", model->accessors[i].sparse.count);
+            printf("\t\tIndices:\n");
+            printf("\t\t\tBufferView: %u\n", model->accessors[i].sparse.indices.bufferView);
+            printf("\t\t\tByteOffset: %lu\n", model->accessors[i].sparse.indices.byteOffset);
+            printf("\t\t\tComponentType: %u\n", model->accessors[i].sparse.indices.componentType);
+            printf("\t\tValues:\n");
+            printf("\t\t\tBufferView: %u\n", model->accessors[i].sparse.values.bufferView);
+            printf("\t\t\tByteOffset: %lu\n", model->accessors[i].sparse.values.byteOffset);
+        }
+    }
+
+    // Buffer Views
+    printf("----------------------------------------\n");
+    for(u32 i = 0; i < model->bufferViewsCount; i++){
+        printf("Buffer View %u:\n", i);
+        printf("\tBuffer:      %u\n", model->bufferViews[i].buffer);
+        printf("\tByte Offset: %lu\n", model->bufferViews[i].byteOffset);
+        printf("\tByte Length: %lu\n", model->bufferViews[i].byteLength);
+        printf("\tByte Stride: %hhu\n", model->bufferViews[i].byteStride);
+        if(model->bufferViews[i].hasTarget) printf("\tTarget:      %u\n", model->bufferViews[i].target);
+        if(model->bufferViews[i].nameLength > 0) printf("\tName:        %s\n", model->bufferViews[i].name);
+    }
+
+    // Buffers
     printf("----------------------------------------\n");
 
-    for(u32 i = 0; i < model->scenesCount; i++){
-        printf("Scene %u:\n", i);
-        if(model->scenes[i].nodesLength > 0){
-            printf("\tNodes: [");
-            for(u32 j = 0; j < model->scenes[i].nodesLength; j++){
-                printf("%u", model->scenes[i].nodes[j]);
-                if(j != model->scenes[i].nodesLength - 1) printf(", ");
-            }
-            printf("]\n");
-        }
-        if(model->scenes[i].nameLength > 0) printf("\tName:  %s\n", model->scenes[i].name);        
+    for(u32 i = 0; i < model->buffersCount; i++){
+        printf("Buffer %u:\n", i);
+        printf("\tByteLength: %lu\n", model->buffers[i].byteLength);
+        if(model->buffers[i].nameLength > 0) printf("\tName:       %s", model->buffers[i].name);
+        if(model->buffers[i].uriLength > 0) printf("\tUri:        %s", model->buffers[i].uri);       
     }
 
     printf("========================================\n");

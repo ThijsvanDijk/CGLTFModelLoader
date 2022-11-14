@@ -62,10 +62,11 @@ typedef enum{
     GLTF_MESH_PRIMITIVE_ATTRIBUTE_TYPE_POSITION,
     GLTF_MESH_PRIMITIVE_ATTRIBUTE_TYPE_NORMAL,
     GLTF_MESH_PRIMITIVE_ATTRIBUTE_TYPE_TANGENT,
-    GLTF_MESH_PRIMITIVE_ATTRIBUTE_TYPE_TEXCOORD,
-    GLTF_MESH_PRIMITIVE_ATTRIBUTE_TYPE_COLOR,
-    GLTF_MESH_PRIMITIVE_ATTRIBUTE_TYPE_JOINTS,
-    GLTF_MESH_PRIMITIVE_ATTRIBUTE_TYPE_WEIGHTS
+    GLTF_MESH_PRIMITIVE_ATTRIBUTE_TYPE_TEXCOORD_0,
+    GLTF_MESH_PRIMITIVE_ATTRIBUTE_TYPE_TEXCOORD_1,
+    GLTF_MESH_PRIMITIVE_ATTRIBUTE_TYPE_COLOR_0,
+    GLTF_MESH_PRIMITIVE_ATTRIBUTE_TYPE_JOINTS_0,
+    GLTF_MESH_PRIMITIVE_ATTRIBUTE_TYPE_WEIGHTS_0
 } GLTFMeshPrimitiveAttributeType;
 
 typedef enum{
@@ -303,19 +304,33 @@ typedef struct{
 //---------- Meshes ----------//
 
 typedef struct{
-    GLTFMeshPrimitiveAttributeType type;
-    u32 accessor;
-} GLTFMeshPrimitiveAttribute;
-
-typedef GLTFMeshPrimitiveAttribute* GLTFMorphTarget;
+    u32 position;
+    u32 normal;
+    u32 tangent;
+    u32 texcoord0;
+    u32 texcoord1;
+    u32 color;
+    u32 joints;
+    u32 weights;
+    bool hasPosition : 1;
+    bool hasNormal : 1;
+    bool hasTangent : 1;
+    bool hasTexcoord0 : 1;
+    bool hasTexcoord1 : 1;
+    bool hasColor : 1;
+    bool hasJoints : 1;
+    bool hasWeights : 1;
+} GLTFMeshPrimitiveAttributes;
 
 typedef struct{
     // Required
-    GLTFMeshPrimitiveAttribute* attributes;
+    GLTFMeshPrimitiveAttributes attributes;
     // Optional
     u32 indices;
     u32 material;
     GLTFMeshPrimitiveMode mode;
+    bool hasIndices : 1;
+    bool hasMaterial : 1;
     // GLTFMorphTarget* targets;
 } GLTFMeshPrimitive;
 
@@ -325,6 +340,9 @@ typedef struct{
     // Optional
     const string name;
     float* weights;
+    u32 primitivesLength;
+    u32 weightsLength;
+    u32 nameLength;
 } GLTFMesh;
 
 //---------- Nodes ----------//

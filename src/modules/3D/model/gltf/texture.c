@@ -1,9 +1,10 @@
 #include <3D/model/gltf/texture.h>
 
-u64 gltf_getTexturesSize(zj_Value* accessors_json){
-    return 0;
+u64 gltf_getTexturesSize(zj_Value* textures, GLTFModel* model){
+    u64 bufferLengthAccumulator = 0;
+    return bufferLengthAccumulator;
 }
 
-i8 gltf_fillTexturesBuffer(zj_Value* accessors_json, void* bufferPointer){
-    return 0;
+byte* gltf_fillTexturesBuffer(zj_Value* textures, GLTFModel* model, byte* bufferPointer){
+    return bufferPointer;
 }

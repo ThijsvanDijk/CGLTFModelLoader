@@ -11,7 +11,7 @@
     assigned spaces in this allocated buffer.
 */
 
-static __always_inline u64 gltf_getModelBufferSize(zj_Value* parsed_json, GLTFModel* model){
+static u64 gltf_getModelBufferSize(zj_Value* parsed_json, GLTFModel* model){
     u64 bufferSizeAccumulator = 0;
     zj_Value* accessors = zj_ObjGet(parsed_json, "accessors");
     // zj_Value* animations = zj_ObjGet(parsed_json, "animations");
@@ -21,7 +21,7 @@ static __always_inline u64 gltf_getModelBufferSize(zj_Value* parsed_json, GLTFMo
     // zj_Value* cameras = zj_ObjGet(parsed_json, "cameras");
     // zj_Value* images = zj_ObjGet(parsed_json, "images");
     // zj_Value* materials = zj_ObjGet(parsed_json, "materials");
-    // zj_Value* meshes = zj_ObjGet(parsed_json, "meshes");
+    zj_Value* meshes = zj_ObjGet(parsed_json, "meshes");
     zj_Value* nodes = zj_ObjGet(parsed_json, "nodes");
     // zj_Value* samplers = zj_ObjGet(parsed_json, "samplers");
     zj_Value* scenes = zj_ObjGet(parsed_json, "scenes");
@@ -37,7 +37,7 @@ static __always_inline u64 gltf_getModelBufferSize(zj_Value* parsed_json, GLTFMo
     // if(cameras != NULL) bufferSizeAccumulator += gltf_getCamerasSize(cameras);
     // if(images != NULL) bufferSizeAccumulator += gltf_getImagesSize(images);
     // if(materials != NULL) bufferSizeAccumulator += gltf_getMaterialsSize(materials);
-    // if(meshes != NULL) bufferSizeAccumulator += gltf_getMeshesSize(meshes);
+    if(meshes != NULL) bufferSizeAccumulator += gltf_getMeshesSize(meshes, model);
     if(nodes != NULL) bufferSizeAccumulator += gltf_getNodesSize(nodes, model);
     // if(samplers != NULL) bufferSizeAccumulator += gltf_getSamplersSize(samplers);
     if(scenes != NULL) bufferSizeAccumulator += gltf_getScenesSize(scenes, model);
@@ -47,7 +47,7 @@ static __always_inline u64 gltf_getModelBufferSize(zj_Value* parsed_json, GLTFMo
     return bufferSizeAccumulator;
 }
 
-static __always_inline i8 gltf_fillModelData(zj_Value* parsed_json, GLTFModel* model){
+static i8 gltf_fillModelData(zj_Value* parsed_json, GLTFModel* model){
     byte* bufferPointer = model->data;
     zj_Value* accessors = zj_ObjGet(parsed_json, "accessors");
     // zj_Value* animations = zj_ObjGet(parsed_json, "animations");
@@ -57,19 +57,20 @@ static __always_inline i8 gltf_fillModelData(zj_Value* parsed_json, GLTFModel* m
     // zj_Value* cameras = zj_ObjGet(parsed_json, "cameras");
     // zj_Value* images = zj_ObjGet(parsed_json, "images");
     // zj_Value* materials = zj_ObjGet(parsed_json, "materials");
-    // zj_Value* meshes = zj_ObjGet(parsed_json, "meshes");
+    zj_Value* meshes = zj_ObjGet(parsed_json, "meshes");
     zj_Value* nodes = zj_ObjGet(parsed_json, "nodes");
     // zj_Value* samplers = zj_ObjGet(parsed_json, "samplers");
     zj_Value* scenes = zj_ObjGet(parsed_json, "scenes");
     // zj_Value* skins = zj_ObjGet(parsed_json, "skins");
     // zj_Value* textures = zj_ObjGet(parsed_json, "textures");
 
-    bufferPointer = gltf_fillAssetBuffer(asset, model, bufferPointer);
-    if(buffers != 0) bufferPointer = gltf_fillBuffersBuffer(buffers, model, bufferPointer);
-    if(bufferViews != 0) bufferPointer = gltf_fillBufferViewsBuffer(bufferViews, model, bufferPointer); 
-    if(nodes != 0) bufferPointer = gltf_fillNodesBuffer(nodes, model, bufferPointer);
-    if(scenes != 0) bufferPointer = gltf_fillScenesBuffer(scenes, model, bufferPointer); 
-    if(accessors != 0) bufferPointer = gltf_fillAccessorsBuffer(accessors, model, bufferPointer);
+    bufferPointer = gltf_fillAssetBuffer(asset, model, bufferPointer); 
+    if(scenes) bufferPointer = gltf_fillScenesBuffer(scenes, model, bufferPointer);
+    if(nodes) bufferPointer = gltf_fillNodesBuffer(nodes, model, bufferPointer);
+    if(meshes) bufferPointer = gltf_fillMeshesBuffer(meshes, model, bufferPointer);
+    if(accessors) bufferPointer = gltf_fillAccessorsBuffer(accessors, model, bufferPointer); 
+    if(bufferViews) bufferPointer = gltf_fillBufferViewsBuffer(bufferViews, model, bufferPointer);
+    if(buffers) bufferPointer = gltf_fillBuffersBuffer(buffers, model, bufferPointer);
     
       
 }
@@ -104,7 +105,7 @@ i8 gltf_modelLoad(const char* filename, GLTFModel* model){
     if(fileLength < (sizeof(u32) * 5)) gltf_error(1);
 
     // Read entire file into a buffer
-    byte fileBuffer[fileLength];
+    byte* fileBuffer = malloc(fileLength);
     fseek(file, 0, SEEK_SET);
     fread(fileBuffer, sizeof(u8), fileLength, file);
     fclose(file);

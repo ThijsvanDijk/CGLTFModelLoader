@@ -19,12 +19,12 @@ static const u8 accessorTypeSizes[] = {
     1, 2, 3, 4, 4, 9, 16
 };
 
-u64 gltf_getAccessorsSize(zj_Value* accessors_json, GLTFModel* model){
+u64 gltf_getAccessorsSize(zj_Value* accessors, GLTFModel* model){
     u64 bufferLengthAccumulator = 0;
 
     u32 accessorsCount = 0;
     zj_Value* currentAccessor;
-    while(currentAccessor = zj_ArrayGet(accessors_json, accessorsCount)){
+    while(currentAccessor = zj_ArrayGet(accessors, accessorsCount)){
         accessorsCount++;
 
         zj_Value* name = zj_ObjGet(currentAccessor, "name");
@@ -36,13 +36,13 @@ u64 gltf_getAccessorsSize(zj_Value* accessors_json, GLTFModel* model){
     return bufferLengthAccumulator;
 }
 
-i8 gltf_fillAccessorsBuffer(zj_Value* accessors_json, GLTFModel* model, void* bufferPointer){
+byte* gltf_fillAccessorsBuffer(zj_Value* accessors, GLTFModel* model, byte* bufferPointer){
     model->accessors = (GLTFAccessor*)bufferPointer;
     bufferPointer += model->accessorsCount * sizeof(GLTFAccessor);
 
     zj_Value* currentAccessor;
     for(uint32_t i = 0; i < model->accessorsCount; i++){
-        currentAccessor = zj_ArrayGet(accessors_json, i);
+        currentAccessor = zj_ArrayGet(accessors, i);
 
         // componentType
         model->accessors[i].componentType = *zj_GetInt(zj_ObjGet(currentAccessor, "componentType")) - 5120;
@@ -112,5 +112,5 @@ i8 gltf_fillAccessorsBuffer(zj_Value* accessors_json, GLTFModel* model, void* bu
         }
     }
 
-    return 0;
+    return bufferPointer;
 }

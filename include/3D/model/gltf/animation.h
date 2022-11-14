@@ -3,8 +3,8 @@
 
 #include <3D/model/gltf/types.h>
 
-u64 gltf_getAnimationsSize(zj_Value* accessors_json);
+u64 gltf_getAnimationsSize(zj_Value* animations, GLTFModel* model);
 
-i8 gltf_fillAnimationsBuffer(zj_Value* accessors_json, void* bufferPointer);
+byte* gltf_fillAnimationsBuffer(zj_Value* animations, GLTFModel* model, byte* bufferPointer);
 
 #endif

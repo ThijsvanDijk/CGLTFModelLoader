@@ -3,8 +3,8 @@
 
 #include <3D/model/gltf/types.h>
 
-u64 gltf_getSkinsSize(zj_Value* accessors_json);
+u64 gltf_getSkinsSize(zj_Value* skins, GLTFModel* model);
 
-i8 gltf_fillSkinsBuffer(zj_Value* accessors_json, void* bufferPointer);
+byte* gltf_fillSkinsBuffer(zj_Value* skins, GLTFModel* model, byte* bufferPointer);
 
 #endif

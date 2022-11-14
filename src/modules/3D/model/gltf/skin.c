@@ -1,9 +1,10 @@
 #include <3D/model/gltf/skin.h>
 
-u64 gltf_getSkinsSize(zj_Value* accessors_json){
-    return 0;
+u64 gltf_getSkinsSize(zj_Value* skins, GLTFModel* model){
+    u64 bufferLengthAccumulator = 0;
+    return bufferLengthAccumulator;
 }
 
-i8 gltf_fillSkinsBuffer(zj_Value* accessors_json, void* bufferPointer){
-    return 0;
+byte* gltf_fillSkinsBuffer(zj_Value* skins, GLTFModel* model, byte* bufferPointer){
+    return bufferPointer;
 }

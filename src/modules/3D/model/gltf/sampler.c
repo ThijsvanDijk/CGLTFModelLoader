@@ -1,9 +1,10 @@
 #include <3D/model/gltf/sampler.h>
 
-u64 gltf_getSamplersSize(zj_Value* accessors_json){
-    return 0;
+u64 gltf_getSamplersSize(zj_Value* samplers, GLTFModel* model){
+    u64 bufferLengthAccumulator = 0;
+    return bufferLengthAccumulator;
 }
 
-i8 gltf_fillSamplersBuffer(zj_Value* accessors_json, void* bufferPointer){
-    return 0;
+byte* gltf_fillSamplersBuffer(zj_Value* samplers, GLTFModel* model, byte* bufferPointer){
+    return bufferPointer;
 }

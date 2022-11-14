@@ -1,9 +1,10 @@
 #include <3D/model/gltf/animation.h>
 
-u64 gltf_getAnimationsSize(zj_Value* accessors_json){
-    return 0;
+u64 gltf_getAnimationsSize(zj_Value* animations, GLTFModel* model){
+    u64 bufferLengthAccumulator = 0;
+    return bufferLengthAccumulator;
 }
 
-i8 gltf_fillAnimationsBuffer(zj_Value* accessors_json, void* bufferPointer){
-    return 0;
+byte* gltf_fillAnimationsBuffer(zj_Value* animations, GLTFModel* model, byte* bufferPointer){
+    return bufferPointer;
 }

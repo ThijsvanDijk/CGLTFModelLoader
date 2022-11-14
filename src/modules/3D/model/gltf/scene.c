@@ -30,13 +30,13 @@ u64 gltf_getScenesSize(zj_Value* scenes, GLTFModel* model){
     return bufferLengthAccumulator;
 }
 
-byte* gltf_fillScenesBuffer(zj_Value* scenes_json, GLTFModel* model, byte* bufferPointer){
+byte* gltf_fillScenesBuffer(zj_Value* scenes, GLTFModel* model, byte* bufferPointer){
     model->scenes = (GLTFScene *)bufferPointer;
     bufferPointer += model->scenesCount * sizeof(GLTFScene);
 
     zj_Value* currentScene;
     for(u32 i = 0; i < model->scenesCount; i++){
-        currentScene = zj_ArrayGet(scenes_json, i);
+        currentScene = zj_ArrayGet(scenes, i);
         // Count the nodes
         model->scenes[i].nodesLength = 0;
         zj_Value* nodes = zj_ObjGet(currentScene, "nodes");

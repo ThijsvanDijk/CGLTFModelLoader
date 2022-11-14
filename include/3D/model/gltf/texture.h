@@ -3,8 +3,8 @@
 
 #include <3D/model/gltf/types.h>
 
-u64 gltf_getTexturesSize(zj_Value* accessors_json);
+u64 gltf_getTexturesSize(zj_Value* textures, GLTFModel* model);
 
-i8 gltf_fillTexturesBuffer(zj_Value* accessors_json, void* bufferPointer);
+byte* gltf_fillTexturesBuffer(zj_Value* textures, GLTFModel* model, byte* bufferPointer);
 
 #endif

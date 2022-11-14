@@ -1,9 +1,10 @@
 #include <3D/model/gltf/material.h>
 
-u64 gltf_getMaterialsSize(zj_Value* accessors_json){
-    return 0;
+u64 gltf_getMaterialsSize(zj_Value* materials, GLTFModel* model){
+    u64 bufferLengthAccumulator = 0;
+    return bufferLengthAccumulator;
 }
 
-i8 gltf_fillMaterialsBuffer(zj_Value* accessors_json, void* bufferPointer){
-    return 0;
+byte* gltf_fillMaterialsBuffer(zj_Value* materials, GLTFModel* model, byte* bufferPointer){
+    return bufferPointer;
 }
