@@ -447,6 +447,7 @@ typedef struct{
     u32 texturesCount;
     u64 dataLength;
     byte* data;
+    byte* binDataStart;
 } GLTFModel;
 
 #endif

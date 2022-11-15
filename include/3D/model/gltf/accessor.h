@@ -7,6 +7,4 @@ u64 gltf_getAccessorsSize(zj_Value* accessors, GLTFModel* model);
 
 byte* gltf_fillAccessorsBuffer(zj_Value* accessors, GLTFModel* model, byte* bufferPointer);
 
-
-
 #endif

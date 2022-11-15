@@ -47,7 +47,7 @@ static u64 gltf_getModelBufferSize(zj_Value* parsed_json, GLTFModel* model){
     return bufferSizeAccumulator;
 }
 
-static i8 gltf_fillModelData(zj_Value* parsed_json, GLTFModel* model){
+static byte* gltf_fillModelData(zj_Value* parsed_json, GLTFModel* model){
     byte* bufferPointer = model->data;
     zj_Value* accessors = zj_ObjGet(parsed_json, "accessors");
     // zj_Value* animations = zj_ObjGet(parsed_json, "animations");
@@ -72,7 +72,7 @@ static i8 gltf_fillModelData(zj_Value* parsed_json, GLTFModel* model){
     if(bufferViews) bufferPointer = gltf_fillBufferViewsBuffer(bufferViews, model, bufferPointer);
     if(buffers) bufferPointer = gltf_fillBuffersBuffer(buffers, model, bufferPointer);
     
-      
+    return bufferPointer;
 }
 
 i8 gltf_modelLoad(const char* filename, GLTFModel* model){
@@ -126,7 +126,14 @@ i8 gltf_modelLoad(const char* filename, GLTFModel* model){
     model->dataLength = bufferSize;
 
     // Fill buffer
-    gltf_fillModelData(parsed_json, model);
+    byte* bufferPointer = gltf_fillModelData(parsed_json, model);
+
+    // Finally add binary section to data buffer
+    byte* bufferSection = fileBuffer + sizeof(GLTFHeader) + 2 * sizeof(GLTFChunkHeader) + fileBuffer_u32ptr[3]; // Start of bin section
+    u32* binLength = (u32*)(bufferSection - 2 * sizeof(u32));
+
+    memcpy(bufferPointer, bufferSection, *binLength);
+    model->binDataStart = bufferPointer;
 
     free(fileBuffer);
     zj_ReleaseAllocator(allocator);

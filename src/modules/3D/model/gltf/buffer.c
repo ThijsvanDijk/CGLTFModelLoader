@@ -8,6 +8,8 @@ u64 gltf_getBuffersSize(zj_Value* buffers, GLTFModel* model){
     while(currentBuffer = zj_ArrayGet(buffers, buffersCount)){
         buffersCount++;
 
+        bufferLengthAccumulator += *zj_GetInt(zj_ObjGet(currentBuffer, "byteLength"));
+
         zj_Value* uri = zj_ObjGet(currentBuffer, "uri");
         if(uri != 0) bufferLengthAccumulator += strlen(zj_GetStr(uri)) + 1;
 
