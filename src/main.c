@@ -17,7 +17,7 @@
 #define WIDTH 1920
 #define HEIGHT 1080
 
-#define NOFITERATIONS 1000
+#define NOFITERATIONS 1
 
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
@@ -27,6 +27,14 @@ int firstMouse = 1;
 int jump = 0, scaler = 0;
 float jumpStartTime, jumpEndTime, scalerStartTime, scalerEndTime;
 camera * main_cam;
+
+static const u8 accessorComponentTypeSizes[] = {
+    1, 1, 2, 2, 0, 4, 4
+};
+
+static const u8 accessorTypeSizes[] = {
+    1, 2, 3, 4, 4, 9, 16
+};
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height){
     glViewport(0, 0, width, height);
@@ -120,12 +128,20 @@ int main(void) {
     GLTFAccessor positionAccessor = model.accessors[mesh.primitives[0].attributes.position];
     GLTFAccessor normalAccessor = model.accessors[mesh.primitives[0].attributes.normal];
     GLTFAccessor indicesAccessor = model.accessors[mesh.primitives[0].indices];
-    GLTFBufferView positionBufferView = model.bufferViews[positionAccessor.bufferView];
-    GLTFBufferView normalBufferView = model.bufferViews[normalAccessor.bufferView];
+    GLTFBufferView vertexBufferView = model.bufferViews[positionAccessor.bufferView];
     GLTFBufferView indicesBufferView = model.bufferViews[indicesAccessor.bufferView];
     GLTFBuffer buffer = model.buffers[0];
 
+    vec3* vertices = (vec3*)model.binDataStart;
+    for(u16 i = 0; i < positionAccessor.count; i++){
+        printf("Vec3 %hu:  [%.2f, %.2f, %.2f]\n", i, vertices[i][0], vertices[i][1], vertices[i][2]);
+    }
 
+    u16* indices = (u16*)(model.binDataStart + indicesBufferView.byteOffset);
+    printf("Indices bufferView ByteOffset: %lu\n", indicesBufferView.byteOffset);
+    for(u16 i = 0; i < indicesAccessor.count; i++){
+        printf("Index %hu: %hu\n", i, indices[i]);
+    }
 
     // //----------Vertex Array Setup----------
     GLuint VBO, VAO, EBO;
@@ -134,15 +150,15 @@ int main(void) {
     glGenBuffers(1, &EBO);
     glBindVertexArray(VAO);
 
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, 576, model.binDataStart, GL_STATIC_DRAW);
+    glBindBuffer(vertexBufferView.target, VBO);
+    glBufferData(vertexBufferView.target, vertexBufferView.byteLength, (void*)(model.binDataStart + vertexBufferView.byteOffset), GL_STATIC_DRAW);
 
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, 72, model.binDataStart + 576, GL_STATIC_DRAW);
+    glBindBuffer(indicesBufferView.target, EBO);
+    glBufferData(indicesBufferView.target, indicesBufferView.byteLength, (void*)(model.binDataStart + indicesBufferView.byteOffset), GL_STATIC_DRAW);
     
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 12, (void*)0);
+    glVertexAttribPointer(0, accessorTypeSizes[positionAccessor.type], positionAccessor.componentType + 5120, positionAccessor.normalized, vertexBufferView.byteStride, (void*)positionAccessor.byteOffset);
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 12, (void*)288);
+    glVertexAttribPointer(1, accessorTypeSizes[normalAccessor.type], normalAccessor.componentType + 5120, normalAccessor.normalized, vertexBufferView.byteStride, (void*)normalAccessor.byteOffset);
     glEnableVertexAttribArray(1);
 
     vec3 scale = {1.0f, 1.0f, 1.0f};
@@ -161,7 +177,7 @@ int main(void) {
 
         process_input(window);
 
-        glClearColor(0.2f, 0.1f, 0.5f, 1.0f);
+        glClearColor(0.1f, 0.6f, 0.7f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glUseProgram(program);
 
@@ -171,7 +187,8 @@ int main(void) {
         mat4 view = GLM_MAT4_IDENTITY_INIT;
         engine_camera_view_matrix(main_cam, view);
 
-        mat4 modelMat = GLM_MAT4_IDENTITY_INIT;
+        mat4 modelMat;
+        memcpy(modelMat, model.nodes[0].matrix, sizeof(mat4));
         vec3 translate = GLM_VEC3_ZERO_INIT;
 
         glm_translate(modelMat, translate);
@@ -186,7 +203,7 @@ int main(void) {
         glUniform3fv(viewPosLoc, 1, main_cam->position);
 
         glBindVertexArray(VAO);
-        glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_SHORT, (void *)model.binDataStart + 576);
+        glDrawElements(mesh.primitives[0].mode, indicesAccessor.count, indicesAccessor.componentType + 5120, (void *)0);
         glBindVertexArray(0);
 
         glfwSwapBuffers(window);

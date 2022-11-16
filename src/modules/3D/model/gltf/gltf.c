@@ -131,7 +131,6 @@ i8 gltf_modelLoad(const char* filename, GLTFModel* model){
     // Finally add binary section to data buffer
     byte* bufferSection = fileBuffer + sizeof(GLTFHeader) + 2 * sizeof(GLTFChunkHeader) + fileBuffer_u32ptr[3]; // Start of bin section
     u32* binLength = (u32*)(bufferSection - 2 * sizeof(u32));
-
     memcpy(bufferPointer, bufferSection, *binLength);
     model->binDataStart = bufferPointer;
 
