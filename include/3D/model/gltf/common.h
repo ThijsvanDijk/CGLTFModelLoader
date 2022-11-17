@@ -18,9 +18,6 @@
 #define i64     __INT64_TYPE__
 #define i128    __int128_t
 
-// String type
-#define string char*
-
 // Bool type
 #define byte u8
 

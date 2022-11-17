@@ -41,6 +41,7 @@ add_executable( cgltf
                 src/modules/3D/model/gltf/scene.c
                 src/modules/3D/model/gltf/skin.c
                 src/modules/3D/model/gltf/texture.c
+                src/modules/3D/model/model.c
                 src/modules/glad/glad.c)
 
 

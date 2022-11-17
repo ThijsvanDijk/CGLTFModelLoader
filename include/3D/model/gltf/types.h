@@ -135,7 +135,7 @@ typedef struct{
     u64 byteOffset; // Default: 0
     bool normalized; // Default: false
     GLTFAccessorSparse sparse;
-    const string name;
+    const char* name;
     u32 nameLength;
     bool hasBufferView : 1;
     bool hasSparse : 1;
@@ -169,7 +169,7 @@ typedef struct{
     GLTFAnimationChannel* channels;
     GLTFAnimationSampler* samplers;
     // Optional
-    const string name;
+    const char* name;
     u32 channelCount, samplerCount;
 } GLTFAnimation;
 
@@ -185,8 +185,8 @@ typedef struct {
     // Optional
     u8 minVersionMajor;
     u8 minVersionMinor;
-    const string copyright;
-    const string generator;
+    char* copyright;
+    char* generator;
 } GLTFAsset;
 
 //---------- Buffers ----------//
@@ -195,8 +195,8 @@ typedef struct{
     // Required
     u64 byteLength;
     // Optionals
-    const string name;
-    const string uri;
+    const char* name;
+    const char* uri;
     u16 nameLength;
     u16 uriLength;
 } GLTFBuffer;
@@ -211,7 +211,7 @@ typedef struct{
     u64 byteOffset; // Default : 0
     u8 byteStride; // Default : 0
     GLTFBufferViewTarget target;
-    const string name;
+    const char* name;
     bool hasTarget;
     u16 nameLength;
 } GLTFBufferView;
@@ -241,7 +241,7 @@ typedef struct{
     // Optional
     GLTFCameraOrthographic orthographic;
     GLTFCameraPerspective perspective;
-    const string name;
+    const char* name;
 } GLTFCamera;
 
 //---------- Images ----------//
@@ -250,8 +250,8 @@ typedef struct{
     // Optional
     u32 bufferView;
     GLTFImageMimeType mimeType;    
-    const string name;
-    const string uri;    
+    const char* name;
+    const char* uri;    
 } GLTFImage;
 
 //---------- Materials ----------//
@@ -290,7 +290,7 @@ typedef struct{
 
 typedef struct{
     // Optional
-    const string name;
+    const char* name;
     GLTFMaterialPBRMetallicRoughness pbrMetallicRoughness;
     GLTFMaterialNormalTextureInfo normalTexture;
     GLTFMaterialOcclusionTextureInfo occlusionTexture;
@@ -338,7 +338,7 @@ typedef struct{
     // Required
     GLTFMeshPrimitive* primitives;
     // Optional
-    const string name;
+    const char* name;
     float* weights;
     u32 primitivesLength;
     u32 weightsLength;
@@ -379,7 +379,7 @@ typedef struct{
     GLTFSamplerMinFilter minFilter;
     GLTFSamplerWrapMode wrapS;
     GLTFSamplerWrapMode wrapT;
-    const string name;
+    const char* name;
 } GLTFSampler;
 
 //---------- Scenes ----------//
@@ -387,7 +387,7 @@ typedef struct{
 typedef struct{
     // Optional
     u32* nodes;
-    const string name; 
+    const char* name; 
     u32 nodesLength;
     u32 nameLength;   
 } GLTFScene;
@@ -400,7 +400,7 @@ typedef struct{
     // Optional
     u32 inverseBindMatrices;
     u32 skeleton;
-    const string name;
+    const char* name;
 } GLTFSkin;
 
 //---------- Textures ----------//
@@ -409,7 +409,7 @@ typedef struct{
     // Optional
     u32 sampler;
     u32 source;
-    const string name;
+    const char* name;
 } GLTFTexture;
 
 //---------- Root Model ----------//
@@ -431,7 +431,8 @@ typedef struct{
     u32 scene; 
     GLTFScene* scenes;
     GLTFSkin* skins;
-    GLTFTexture* textures; 
+    GLTFTexture* textures;
+    bool hasScene; 
     u32 accessorsCount;
     u32 animationsCount;
     u32 buffersCount;

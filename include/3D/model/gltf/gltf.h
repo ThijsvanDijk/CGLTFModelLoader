@@ -2,7 +2,10 @@
 #define GLTF_H
 
 // Libraries
+#ifndef WIN32
 #include <fcntl.h>
+#include <unistd.h>
+#endif
 
 // Types
 #include <3D/model/gltf/header.h>
@@ -32,5 +35,11 @@
 #define GLTF_MIN_SUPPORTED_VERSION_MINOR 0
 
 i8 gltf_modelLoad(const char* filename, GLTFModel* model);
+
+/**
+ * @brief Print comprehensive info about all properties of the model to terminal
+ * 
+ */
+void print_model(GLTFModel* model);
 
 #endif

@@ -173,7 +173,7 @@ byte* gltf_fillMeshesBuffer(zj_Value* meshes, GLTFModel* model, byte* bufferPoin
         model->meshes[i].nameLength = 0;
         zj_Value* name = zj_ObjGet(currentMesh, "name");
         if(name){
-            const string nameString = zj_GetStr(name);
+            const char* nameString = zj_GetStr(name);
             u16 nameLength = strlen(nameString) + 1;
             strncpy(bufferPointer, nameString, nameLength);
             model->meshes[i].nameLength = nameLength;

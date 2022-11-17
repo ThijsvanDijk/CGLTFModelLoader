@@ -37,7 +37,7 @@ byte* gltf_fillBuffersBuffer(zj_Value* buffers, GLTFModel* model, byte* bufferPo
         model->buffers[i].uriLength = 0;
         zj_Value* uri = zj_ObjGet(currentBuffer, "uri");
         if(uri != 0){
-            const string uriString = zj_GetStr(uri);
+            const char* uriString = zj_GetStr(uri);
             u16 uriLength = strlen(uriString) + 1;
             strncpy(bufferPointer, uriString, uriLength);
             model->buffers[i].uriLength = uriLength;
@@ -48,7 +48,7 @@ byte* gltf_fillBuffersBuffer(zj_Value* buffers, GLTFModel* model, byte* bufferPo
         model->buffers[i].nameLength = 0;
         zj_Value* name = zj_ObjGet(currentBuffer, "name");
         if(name != 0){
-            const string nameString = zj_GetStr(name);
+            const char* nameString = zj_GetStr(name);
             u16 nameLength = strlen(nameString) + 1;
             strncpy(bufferPointer, nameString, nameLength);
             model->buffers[i].nameLength = nameLength;

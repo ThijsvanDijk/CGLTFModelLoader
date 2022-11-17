@@ -55,7 +55,7 @@ byte* gltf_fillScenesBuffer(zj_Value* scenes, GLTFModel* model, byte* bufferPoin
         model->scenes[i].nameLength = 0;
         zj_Value* scene_name = zj_ObjGet(currentScene, "name");
         if(scene_name){
-            const string nameString = zj_GetStr(scene_name);
+            const char* nameString = zj_GetStr(scene_name);
             u32 nameLength = strlen(nameString) + 1;
             strncpy(bufferPointer, nameString, nameLength);
             model->scenes[i].nameLength = nameLength;

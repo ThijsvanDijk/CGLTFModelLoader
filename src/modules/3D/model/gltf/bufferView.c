@@ -46,7 +46,7 @@ byte* gltf_fillBufferViewsBuffer(zj_Value* bufferViews, GLTFModel* model, byte* 
         model->bufferViews[i].nameLength = 0;
         zj_Value* name = zj_ObjGet(currentBufferView, "name");
         if(name != 0){
-            const string nameString = zj_GetStr(name);
+            const char* nameString = zj_GetStr(name);
             u16 nameLength = strlen(nameString) + 1;
             strncpy(bufferPointer, nameString, nameLength);
             model->bufferViews[i].nameLength = nameLength;
